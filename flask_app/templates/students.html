@@ -1,0 +1,1329 @@
+{% extends "base.html" %}
+
+{% block title %}Danh sách sinh viên - HUIT Student Management{% endblock %}
+
+{% block page_title %}Danh sách sinh viên{% endblock %}
+
+{% block content %}
+{% if students %}
+<!-- Filters and Search -->
+<div class="card">
+    <div class="card-header">
+        <h3 class="card-title">
+            <i data-lucide="filter"></i>
+            Bộ lọc
+        </h3>
+    </div>
+    
+    <form class="filter-form" method="GET">
+        <div class="grid grid-3">
+            <div class="form-group">
+                <label class="form-label">Tìm kiếm</label>
+                <input type="text" name="search" class="form-input" placeholder="Tên hoặc MSSV..." 
+                       value="{{ search_query or '' }}">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Lớp</label>
+                <select name="class" class="form-select">
+                    <option value="">Tất cả lớp</option>
+                    {% if unique_classes %}
+                        {% for class_name in unique_classes %}
+                        <option value="{{ class_name }}" {% if class_name == class_filter %}selected{% endif %}>
+                            {{ class_name }}
+                        </option>
+                        {% endfor %}
+                    {% endif %}
+                </select>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Sắp xếp</label>
+                <select name="sort" class="form-select">
+                    <option value="name" {% if sort_option == 'name' %}selected{% endif %}>Theo tên</option>
+                    <option value="mssv" {% if sort_option == 'mssv' %}selected{% endif %}>Theo MSSV</option>
+                    <option value="class" {% if sort_option == 'class' %}selected{% endif %}>Theo lớp</option>
+                    <option value="score" {% if sort_option == 'score' %}selected{% endif %}>Theo điểm</option>
+                </select>
+            </div>
+        </div>
+        <div style="margin-top: 1rem;">
+            <button type="submit" class="btn btn-primary">
+                <i data-lucide="search"></i>
+                Áp dụng bộ lọc
+            </button>
+            <button type="button" class="btn btn-secondary" onclick="clearFilters()">
+                <i data-lucide="x"></i>
+                Xóa bộ lọc
+            </button>
+        </div>
+    </form>
+</div>
+
+<!-- Students Table -->
+<div class="card">
+    <div class="card-header">
+        <h3 class="card-title">
+            <i data-lucide="users"></i>
+            {% if search_query or class_filter %}
+                Kết quả tìm kiếm ({{ total_filtered }}/{{ total_students }} sinh viên)
+            {% else %}
+                Danh sách sinh viên ({{ total_students }} sinh viên)
+            {% endif %}
+        </h3>
+        <div>
+            <button class="btn btn-primary" onclick="openAddStudentModal()">
+                <i data-lucide="plus"></i>
+                Thêm sinh viên
+            </button>
+            <button class="btn btn-primary" onclick="openImportModal()">
+                <i data-lucide="upload"></i>
+                Nhập dữ liệu
+            </button>
+            <button class="btn btn-secondary" onclick="exportStudents()">
+                <i data-lucide="download"></i>
+                Xuất danh sách
+            </button>
+        </div>
+    </div>
+    
+    <div class="table-container">
+        <table class="table data-table">
+            <thead>
+                <tr>
+                    <th data-sortable>STT</th>
+                    {% for column in columns %}
+                    <th data-sortable>{{ column_display_names.get(column, column) }}</th>
+                    {% endfor %}
+                    <th>Thao tác</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for student in students %}
+                <tr>
+                    <td>{{ loop.index + (current_page_num - 1) * 20 }}</td>
+                    {% for column in columns %}
+                    <td>{{ student[column] or 'N/A' }}</td>
+                    {% endfor %}
+                    <td>
+                        <div class="action-buttons">
+                            <button class="btn-icon" onclick="viewStudent({{ loop.index0 }})" title="Xem chi tiết">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="eye" class="lucide lucide-eye" style="pointer-events: none;"><path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                            </button>
+                            <button class="btn-icon" onclick="editStudent({{ loop.index0 }})" title="Chỉnh sửa">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="edit" class="lucide lucide-edit" style="pointer-events: none;"><path d="M12 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.375 2.625a1 1 0 0 1 3 3l-9.013 9.014a2 2 0 0 1-.853.505l-2.873.84a.5.5 0 0 1-.62-.62l.84-2.873a2 2 0 0 1 .506-.852z"></path></svg>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    
+    <!-- Pagination -->
+    {% if total_pages > 1 %}
+    <div class="pagination">
+        {% if current_page_num > 1 %}
+        <a href="?page={{ current_page_num - 1 }}{% if search_query %}&search={{ search_query }}{% endif %}{% if class_filter %}&class={{ class_filter }}{% endif %}{% if sort_option %}&sort={{ sort_option }}{% endif %}" class="pagination-btn">
+            <i data-lucide="chevron-left"></i>
+            Trước
+        </a>
+        {% endif %}
+        
+        {% for page in range(1, total_pages + 1) %}
+            {% if page == current_page_num %}
+            <span class="current">{{ page }}</span>
+            {% elif page <= 3 or page > total_pages - 3 or (page >= current_page_num - 1 and page <= current_page_num + 1) %}
+            <a href="?page={{ page }}{% if search_query %}&search={{ search_query }}{% endif %}{% if class_filter %}&class={{ class_filter }}{% endif %}{% if sort_option %}&sort={{ sort_option }}{% endif %}">{{ page }}</a>
+            {% elif page == 4 and current_page_num > 5 %}
+            <span>...</span>
+            {% elif page == total_pages - 3 and current_page_num < total_pages - 4 %}
+            <span>...</span>
+            {% endif %}
+        {% endfor %}
+        
+        {% if current_page_num < total_pages %}
+        <a href="?page={{ current_page_num + 1 }}{% if search_query %}&search={{ search_query }}{% endif %}{% if class_filter %}&class={{ class_filter }}{% endif %}{% if sort_option %}&sort={{ sort_option }}{% endif %}" class="pagination-btn">
+            Sau
+            <i data-lucide="chevron-right"></i>
+        </a>
+        {% endif %}
+    </div>
+    {% endif %}
+</div>
+
+{% else %}
+<!-- No Data State -->
+<div class="card" style="text-align: center; padding: 4rem 2rem;">
+    <div style="margin-bottom: 2rem;">
+        <i data-lucide="users" style="width: 64px; height: 64px; color: #64748b;"></i>
+    </div>
+    <h3 style="color: #64748b; margin-bottom: 1rem;">Chưa có dữ liệu sinh viên</h3>
+    <p style="color: #94a3b8; margin-bottom: 2rem;">
+        Vui lòng tải lên file dữ liệu để xem danh sách sinh viên
+    </p>
+    <a href="{{ url_for('data_management') }}" class="btn btn-primary">
+        <i data-lucide="upload"></i>
+        Tải lên dữ liệu
+    </a>
+</div>
+{% endif %}
+
+<!-- Student Detail Modal -->
+<div class="modal" id="studentModal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3 class="modal-title">Chi tiết sinh viên</h3>
+            <button class="modal-close" onclick="closeModal()">&times;</button>
+        </div>
+        <div class="modal-body" id="studentDetails">
+            <!-- Student details will be loaded here -->
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-secondary" onclick="closeModal()">Đóng</button>
+            <button class="btn btn-primary" onclick="editCurrentStudent()">Chỉnh sửa</button>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<style>
+.filter-form {
+    background: #f8fafc;
+    padding: 1.5rem;
+    border-radius: 8px;
+}
+
+.action-buttons {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.btn-icon {
+    width: 32px;
+    height: 32px;
+    border: none;
+    background: #f1f5f9;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    color: #64748b;
+}
+
+.btn-icon:hover {
+    background: #e2e8f0;
+    color: #334155;
+}
+
+.btn-icon i {
+    width: 16px;
+    height: 16px;
+}
+
+.btn-icon svg {
+    width: 16px;
+    height: 16px;
+    pointer-events: none;
+}
+
+.pagination-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.pagination-btn i {
+    width: 16px;
+    height: 16px;
+}
+
+/* Modal Styles */
+.modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 1000;
+    align-items: center;
+    justify-content: center;
+}
+
+.modal.show {
+    display: flex;
+}
+
+.modal-content {
+    background: white;
+    border-radius: 12px;
+    max-width: 600px;
+    width: 90%;
+    max-height: 80%;
+    overflow: hidden;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.5rem;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.modal-title {
+    margin: 0;
+    color: #1e40af;
+    font-weight: 600;
+}
+
+.modal-close {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+    color: #64748b;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 6px;
+}
+
+.modal-close:hover {
+    background: #f1f5f9;
+    color: #334155;
+}
+
+.modal-body {
+    padding: 1.5rem;
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+    padding: 1.5rem;
+    border-top: 1px solid #e2e8f0;
+}
+
+.student-detail-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.75rem 0;
+    border-bottom: 1px solid #f1f5f9;
+}
+
+.student-detail-label {
+    font-weight: 500;
+    color: #64748b;
+}
+
+.student-detail-value {
+    font-weight: 600;
+    color: #334155;
+}
+</style>
+
+<script>
+// Student data for modal
+let studentsData = {{ students | tojson }};
+
+console.log('=== STUDENT DATA DEBUG ===');
+console.log('studentsData loaded:', studentsData);
+console.log('studentsData length:', studentsData ? studentsData.length : 'undefined');
+console.log('studentsData type:', typeof studentsData);
+
+function clearFilters() {
+    window.location.href = '{{ url_for("students") }}';
+}
+
+function exportStudents() {
+    window.dashboardApp.showLoading();
+    
+    // Simulate export
+    setTimeout(() => {
+        window.dashboardApp.hideLoading();
+        window.dashboardApp.showAlert('success', 'Đã xuất danh sách sinh viên');
+    }, 2000);
+}
+
+function viewStudent(index) {
+    console.log('=== VIEW STUDENT DEBUG ===');
+    console.log('viewStudent called with index:', index);
+    console.log('studentsData:', studentsData);
+    console.log('studentsData length:', studentsData ? studentsData.length : 'undefined');
+    
+    if (!studentsData) {
+        console.error('studentsData is null or undefined');
+        alert('Dữ liệu sinh viên không tồn tại');
+        return;
+    }
+    
+    if (index >= studentsData.length) {
+        console.error('Invalid index:', index, 'Array length:', studentsData.length);
+        alert('Chỉ số sinh viên không hợp lệ');
+        return;
+    }
+    
+    const student = studentsData[index];
+    console.log('Selected student:', student);
+    
+    const modal = document.getElementById('studentModal');
+    const detailsContainer = document.getElementById('studentDetails');
+    
+    console.log('Modal element:', modal);
+    console.log('Details container:', detailsContainer);
+    
+    if (!modal) {
+        console.error('Modal element not found with ID: studentModal');
+        alert('Không tìm thấy modal element');
+        return;
+    }
+    
+    if (!detailsContainer) {
+        console.error('Details container not found with ID: studentDetails');
+        alert('Không tìm thấy container chi tiết');
+        return;
+    }
+    
+    try {
+        let detailsHTML = '';
+        {% for field in detail_fields %}
+        detailsHTML += `
+            <div class="student-detail-item">
+                <span class="student-detail-label">{{ detail_field_display_names.get(field, field) }}:</span>
+                <span class="student-detail-value">${student['{{ field }}'] || 'N/A'}</span>
+            </div>
+        `;
+        {% endfor %}
+        
+        detailsContainer.innerHTML = detailsHTML;
+        modal.classList.add('show');
+        
+        // Store current student index for editing
+        modal.dataset.studentIndex = index;
+        
+        console.log('Modal shown successfully');
+    } catch (error) {
+        console.error('Error displaying student details:', error);
+        alert('Lỗi khi hiển thị thông tin sinh viên: ' + error.message);
+    }
+}
+
+function editStudent(index) {
+    console.log('=== EDIT STUDENT DEBUG ===');
+    console.log('editStudent called with index:', index);
+    
+    // For now, just show view modal
+    // In a real app, this would open an edit form
+    viewStudent(index);
+}
+
+function editCurrentStudent() {
+    const modal = document.getElementById('studentModal');
+    const index = modal.dataset.studentIndex;
+    
+    window.dashboardApp.showAlert('info', 'Tính năng chỉnh sửa đang được phát triển');
+    closeModal();
+}
+
+function closeModal() {
+    const modal = document.getElementById('studentModal');
+    if (modal) {
+        modal.classList.remove('show');
+    }
+}
+
+// Initialize when DOM is loaded
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('=== DOM CONTENT LOADED ===');
+    console.log('Page initialized, studentsData available:', !!studentsData);
+    console.log('Number of students:', studentsData ? studentsData.length : 0);
+    
+    // Check if modal exists
+    const modal = document.getElementById('studentModal');
+    console.log('Student modal exists:', !!modal);
+    
+    // Check if action buttons exist
+    const actionButtons = document.querySelectorAll('.btn-icon');
+    console.log('Number of action buttons found:', actionButtons.length);
+    
+    // Note: Class filter is now populated by server, no need for JavaScript population
+    
+    // Set up modal click outside to close
+    const studentModal = document.getElementById('studentModal');
+    if (studentModal) {
+        studentModal.addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeModal();
+            }
+        });
+        console.log('Modal click-outside-to-close event added');
+    }
+});
+
+// Additional function stubs for missing handlers
+function openAddStudentModal() {
+    console.log('openAddStudentModal called');
+    window.dashboardApp.showAlert('info', 'Chức năng thêm sinh viên đang được phát triển');
+}
+
+function openImportModal() {
+    console.log('openImportModal called');
+    window.dashboardApp.showAlert('info', 'Chức năng import dữ liệu đang được phát triển');
+}
+
+function closeAddStudentModal() {
+    const modal = document.getElementById('addStudentModal');
+    if (modal) {
+        modal.classList.remove('show');
+    }
+}
+
+function closeImportModal() {
+    const modal = document.getElementById('importModal');
+    if (modal) {
+        modal.classList.remove('show');
+    }
+}
+
+function submitAddStudent() {
+    console.log('submitAddStudent called');
+    window.dashboardApp.showAlert('info', 'Chức năng thêm sinh viên đang được phát triển');
+    closeAddStudentModal();
+}
+
+function switchImportTab(tab) {
+    console.log('switchImportTab called with:', tab);
+    // Implementation for tab switching
+}
+
+function applyFilters() {
+    console.log('applyFilters called');
+    const form = document.querySelector('.filter-form');
+    if (form) {
+        form.submit();
+    }
+}
+
+function testFilter() {
+    console.log('testFilter called - Testing API connection');
+    fetch('/api/search', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            query: '',
+            filters: {}
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        console.log('API Test Result:', data);
+        window.dashboardApp.showAlert('success', 'API kết nối thành công!');
+    })
+    .catch(error => {
+        console.error('API Test Error:', error);
+        window.dashboardApp.showAlert('error', 'Lỗi kết nối API: ' + error.message);
+    });
+}
+</script>
+
+<!-- Add Student Modal -->
+<div id="addStudentModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>Thêm sinh viên mới</h3>
+            <button class="close-btn" onclick="closeAddStudentModal()">&times;</button>
+        </div>
+        <div class="modal-body">
+            <form id="addStudentForm">
+                <div class="grid grid-2">
+                    <div class="form-group">
+                        <label class="form-label">MSSV *</label>
+                        <input type="text" name="mssv" class="form-input" required placeholder="Ví dụ: 21520001">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Họ và tên *</label>
+                        <input type="text" name="name" class="form-input" required placeholder="Ví dụ: Nguyễn Văn A">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Lớp</label>
+                        <input type="text" name="class" class="form-input" placeholder="Ví dụ: 21DTHD1">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Điểm</label>
+                        <input type="number" name="score" class="form-input" min="0" max="10" step="0.1" placeholder="0-10">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Email</label>
+                        <input type="email" name="email" class="form-input" placeholder="student@huit.edu.vn">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Số điện thoại</label>
+                        <input type="tel" name="phone" class="form-input" placeholder="0123456789">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Ghi chú</label>
+                    <textarea name="notes" class="form-input" rows="3" placeholder="Ghi chú thêm..."></textarea>
+                </div>
+            </form>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-secondary" onclick="closeAddStudentModal()">Hủy</button>
+            <button class="btn btn-primary" onclick="submitAddStudent()">Thêm sinh viên</button>
+        </div>
+    </div>
+</div>
+
+<!-- Import Data Modal -->
+<div id="importModal" class="modal">
+    <div class="modal-content large">
+        <div class="modal-header">
+            <h3>Nhập dữ liệu sinh viên</h3>
+            <button class="close-btn" onclick="closeImportModal()">&times;</button>
+        </div>
+        <div class="modal-body">
+            <div class="import-tabs">
+                <button class="tab-btn active" onclick="switchImportTab('file')">
+                    <i data-lucide="upload"></i>
+                    Upload File
+                </button>
+                <button class="tab-btn" onclick="switchImportTab('manual')">
+                    <i data-lucide="edit"></i>
+                    Nhập thủ công
+                </button>
+                <button class="tab-btn" onclick="switchImportTab('template')">
+                    <i data-lucide="download"></i>
+                    Tải mẫu
+                </button>
+            </div>
+
+            <!-- File Upload Tab -->
+            <div id="fileImportTab" class="tab-content active">
+                <div class="upload-area" id="uploadArea">
+                    <input type="file" id="fileInput" accept=".csv,.xlsx,.xls" multiple>
+                    <div class="upload-text">
+                        <i data-lucide="upload-cloud"></i>
+                        <h4>Kéo thả file hoặc click để chọn</h4>
+                        <p>Hỗ trợ: CSV, Excel (XLSX, XLS) - Tối đa 16MB</p>
+                    </div>
+                </div>
+                <div id="fileList" class="file-list"></div>
+                
+                <div class="import-options">
+                    <h4>Tùy chọn import</h4>
+                    <div class="grid grid-2">
+                        <div class="form-group">
+                            <label class="form-label">
+                                <input type="checkbox" id="hasHeader" checked>
+                                File có header (dòng tiêu đề)
+                            </label>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">
+                                <input type="checkbox" id="skipDuplicates" checked>
+                                Bỏ qua bản ghi trùng lặp
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                
+                <button class="btn btn-primary" onclick="processImport()">
+                    <i data-lucide="upload"></i>
+                    Xử lý và Import
+                </button>
+            </div>
+
+            <!-- Manual Input Tab -->
+            <div id="manualImportTab" class="tab-content">
+                <div class="manual-input-area">
+                    <h4>Nhập dữ liệu bằng tay</h4>
+                    <p>Nhập từng dòng một sinh viên theo định dạng: MSSV, Tên, Lớp, Điểm (phân cách bằng dấu phẩy)</p>
+                    <textarea id="manualData" rows="10" placeholder="Ví dụ:
+21520001, Nguyễn Văn A, 21DTHD1, 8.5
+21520002, Trần Thị B, 21DTHD1, 7.8
+21520003, Lê Văn C, 21DTHD2, 9.0"></textarea>
+                    <button class="btn btn-primary" onclick="processManualImport()">
+                        <i data-lucide="plus"></i>
+                        Thêm vào danh sách
+                    </button>
+                </div>
+            </div>
+
+            <!-- Template Tab -->
+            <div id="templateTab" class="tab-content">
+                <div class="template-section">
+                    <h4>Tải file mẫu</h4>
+                    <p>Tải file mẫu để biết định dạng dữ liệu cần thiết</p>
+                    <div class="template-buttons">
+                        <button class="btn btn-secondary" onclick="downloadTemplate('csv')">
+                            <i data-lucide="file-text"></i>
+                            Tải mẫu CSV
+                        </button>
+                        <button class="btn btn-secondary" onclick="downloadTemplate('excel')">
+                            <i data-lucide="file-spreadsheet"></i>
+                            Tải mẫu Excel
+                        </button>
+                    </div>
+                    
+                    <div class="format-guide">
+                        <h5>Hướng dẫn định dạng</h5>
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Cột</th>
+                                    <th>Tên trường</th>
+                                    <th>Bắt buộc</th>
+                                    <th>Ví dụ</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>A</td>
+                                    <td>MSSV</td>
+                                    <td>✓</td>
+                                    <td>21520001</td>
+                                </tr>
+                                <tr>
+                                    <td>B</td>
+                                    <td>Họ và tên</td>
+                                    <td>✓</td>
+                                    <td>Nguyễn Văn A</td>
+                                </tr>
+                                <tr>
+                                    <td>C</td>
+                                    <td>Lớp</td>
+                                    <td></td>
+                                    <td>21DTHD1</td>
+                                </tr>
+                                <tr>
+                                    <td>D</td>
+                                    <td>Điểm</td>
+                                    <td></td>
+                                    <td>8.5</td>
+                                </tr>
+                                <tr>
+                                    <td>E</td>
+                                    <td>Email</td>
+                                    <td></td>
+                                    <td>student@huit.edu.vn</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Import Preview -->
+            <div id="importPreview" class="import-preview" style="display: none;">
+                <h4>Xem trước dữ liệu import</h4>
+                <div id="previewTable"></div>
+                <div class="preview-actions">
+                    <button class="btn btn-secondary" onclick="cancelImport()">Hủy</button>
+                    <button class="btn btn-primary" onclick="confirmImport()">Xác nhận Import</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+}
+
+.modal.show {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.modal-content {
+    background: white;
+    border-radius: 12px;
+    width: 90%;
+    max-width: 600px;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.modal-content.large {
+    max-width: 900px;
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.5rem;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.modal-header h3 {
+    margin: 0;
+    color: #1e293b;
+}
+
+.close-btn {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+    color: #64748b;
+    padding: 0.5rem;
+    line-height: 1;
+}
+
+.close-btn:hover {
+    color: #1e293b;
+}
+
+.modal-body {
+    padding: 1.5rem;
+}
+
+.modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+    padding: 1.5rem;
+    border-top: 1px solid #e2e8f0;
+}
+
+.import-tabs {
+    display: flex;
+    border-bottom: 1px solid #e2e8f0;
+    margin-bottom: 1.5rem;
+}
+
+.tab-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 1rem 1.5rem;
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #64748b;
+    border-bottom: 2px solid transparent;
+}
+
+.tab-btn.active {
+    color: #3b82f6;
+    border-bottom-color: #3b82f6;
+}
+
+.tab-content {
+    display: none;
+}
+
+.tab-content.active {
+    display: block;
+}
+
+.upload-area {
+    border: 2px dashed #cbd5e1;
+    border-radius: 8px;
+    padding: 3rem 2rem;
+    text-align: center;
+    transition: all 0.2s;
+    cursor: pointer;
+    position: relative;
+}
+
+.upload-area:hover,
+.upload-area.drag-over {
+    border-color: #3b82f6;
+    background-color: #f0f9ff;
+}
+
+.upload-area input[type="file"] {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    cursor: pointer;
+}
+
+.upload-text i {
+    font-size: 48px;
+    color: #64748b;
+    margin-bottom: 1rem;
+}
+
+.upload-text h4 {
+    margin-bottom: 0.5rem;
+    color: #1e293b;
+}
+
+.upload-text p {
+    color: #64748b;
+    margin: 0;
+}
+
+.file-list {
+    margin-top: 1rem;
+}
+
+.file-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem;
+    background: #f8fafc;
+    border-radius: 8px;
+    margin-bottom: 0.5rem;
+}
+
+.file-info {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.file-remove {
+    background: #ef4444;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 0.25rem 0.5rem;
+    cursor: pointer;
+    font-size: 12px;
+}
+
+.import-options {
+    margin: 2rem 0;
+    padding: 1.5rem;
+    background: #f8fafc;
+    border-radius: 8px;
+}
+
+.import-options h4 {
+    margin-bottom: 1rem;
+    color: #1e293b;
+}
+
+.manual-input-area textarea {
+    width: 100%;
+    padding: 1rem;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    font-family: monospace;
+    resize: vertical;
+}
+
+.template-section {
+    text-align: center;
+}
+
+.template-buttons {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    margin: 1.5rem 0;
+}
+
+.format-guide {
+    margin-top: 2rem;
+    text-align: left;
+}
+
+.format-guide table {
+    margin-top: 1rem;
+}
+
+.import-preview {
+    margin-top: 2rem;
+    padding: 1.5rem;
+    background: #f8fafc;
+    border-radius: 8px;
+}
+
+.preview-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+#previewTable {
+    max-height: 300px;
+    overflow: auto;
+    margin-bottom: 1rem;
+}
+</style>
+
+<script>
+// Import and Add Student functionality
+let importedData = [];
+let selectedFiles = [];
+
+function openAddStudentModal() {
+    document.getElementById('addStudentModal').classList.add('show');
+}
+
+function closeAddStudentModal() {
+    document.getElementById('addStudentModal').classList.remove('show');
+    document.getElementById('addStudentForm').reset();
+}
+
+function openImportModal() {
+    document.getElementById('importModal').classList.add('show');
+}
+
+function closeImportModal() {
+    document.getElementById('importModal').classList.remove('show');
+    resetImportModal();
+}
+
+function resetImportModal() {
+    selectedFiles = [];
+    importedData = [];
+    document.getElementById('fileList').innerHTML = '';
+    document.getElementById('manualData').value = '';
+    document.getElementById('importPreview').style.display = 'none';
+    switchImportTab('file');
+}
+
+function switchImportTab(tabName) {
+    // Remove active class from all tabs and contents
+    document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+    document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+    
+    // Add active class to selected tab
+    document.querySelector(`[onclick="switchImportTab('${tabName}')"]`).classList.add('active');
+    document.getElementById(`${tabName}${tabName === 'template' ? 'Tab' : 'ImportTab'}`).classList.add('active');
+}
+
+async function submitAddStudent() {
+    const form = document.getElementById('addStudentForm');
+    const formData = new FormData(form);
+    
+    try {
+        const response = await fetch('/api/students/add', {
+            method: 'POST',
+            body: formData
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+            if (window.dashboardApp) {
+                window.dashboardApp.showAlert('success', 'Thêm sinh viên thành công!');
+            }
+            closeAddStudentModal();
+            // Reload page to show new student
+            window.location.reload();
+        } else {
+            throw new Error(result.error || 'Có lỗi xảy ra');
+        }
+    } catch (error) {
+        console.error('Error adding student:', error);
+        if (window.dashboardApp) {
+            window.dashboardApp.showAlert('error', 'Có lỗi xảy ra: ' + error.message);
+        }
+    }
+}
+
+// File upload handling
+document.getElementById('fileInput').addEventListener('change', function(e) {
+    handleFileSelection(e.target.files);
+});
+
+document.getElementById('uploadArea').addEventListener('dragover', function(e) {
+    e.preventDefault();
+    this.classList.add('drag-over');
+});
+
+document.getElementById('uploadArea').addEventListener('dragleave', function(e) {
+    this.classList.remove('drag-over');
+});
+
+document.getElementById('uploadArea').addEventListener('drop', function(e) {
+    e.preventDefault();
+    this.classList.remove('drag-over');
+    handleFileSelection(e.dataTransfer.files);
+});
+
+function handleFileSelection(files) {
+    for (let file of files) {
+        if (file.size > 16 * 1024 * 1024) {
+            if (window.dashboardApp) {
+                window.dashboardApp.showAlert('error', `File "${file.name}" quá lớn. Kích thước tối đa là 16MB.`);
+            }
+            continue;
+        }
+        
+        if (!selectedFiles.find(f => f.name === file.name)) {
+            selectedFiles.push(file);
+        }
+    }
+    updateFileList();
+}
+
+function updateFileList() {
+    const fileList = document.getElementById('fileList');
+    
+    if (selectedFiles.length === 0) {
+        fileList.innerHTML = '';
+        return;
+    }
+
+    fileList.innerHTML = selectedFiles.map((file, index) => `
+        <div class="file-item">
+            <div class="file-info">
+                <i data-lucide="file-text"></i>
+                <span>${file.name}</span>
+                <small>(${formatFileSize(file.size)})</small>
+            </div>
+            <button class="file-remove" onclick="removeFile(${index})">
+                <i data-lucide="x"></i>
+            </button>
+        </div>
+    `).join('');
+
+    // Reinitialize Lucide icons
+    if (typeof lucide !== 'undefined') {
+        lucide.createIcons();
+    }
+}
+
+function removeFile(index) {
+    selectedFiles.splice(index, 1);
+    updateFileList();
+}
+
+function formatFileSize(bytes) {
+    if (bytes === 0) return '0 Bytes';
+    const k = 1024;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+}
+
+async function processImport() {
+    if (selectedFiles.length === 0) {
+        if (window.dashboardApp) {
+            window.dashboardApp.showAlert('error', 'Vui lòng chọn file để import');
+        }
+        return;
+    }
+    
+    const formData = new FormData();
+    selectedFiles.forEach(file => {
+        formData.append('files', file);
+    });
+    
+    formData.append('hasHeader', document.getElementById('hasHeader').checked);
+    formData.append('skipDuplicates', document.getElementById('skipDuplicates').checked);
+    
+    try {
+        const response = await fetch('/api/students/import', {
+            method: 'POST',
+            body: formData
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+            importedData = result.data;
+            showImportPreview(result.data);
+        } else {
+            throw new Error(result.error || 'Có lỗi xảy ra khi xử lý file');
+        }
+    } catch (error) {
+        console.error('Error processing import:', error);
+        if (window.dashboardApp) {
+            window.dashboardApp.showAlert('error', 'Có lỗi xảy ra: ' + error.message);
+        }
+    }
+}
+
+function processManualImport() {
+    const manualData = document.getElementById('manualData').value.trim();
+    
+    if (!manualData) {
+        if (window.dashboardApp) {
+            window.dashboardApp.showAlert('error', 'Vui lòng nhập dữ liệu');
+        }
+        return;
+    }
+    
+    try {
+        const lines = manualData.split('
+').filter(line => line.trim());
+        const data = [];
+        
+        for (let line of lines) {
+            const parts = line.split(',').map(part => part.trim());
+            if (parts.length >= 2) {
+                data.push({
+                    mssv: parts[0] || '',
+                    name: parts[1] || '',
+                    class: parts[2] || '',
+                    score: parts[3] || '',
+                    email: parts[4] || '',
+                    phone: parts[5] || ''
+                });
+            }
+        }
+        
+        if (data.length > 0) {
+            importedData = data;
+            showImportPreview(data);
+        } else {
+            throw new Error('Không tìm thấy dữ liệu hợp lệ');
+        }
+    } catch (error) {
+        console.error('Error processing manual data:', error);
+        if (window.dashboardApp) {
+            window.dashboardApp.showAlert('error', 'Lỗi xử lý dữ liệu: ' + error.message);
+        }
+    }
+}
+
+function showImportPreview(data) {
+    const previewDiv = document.getElementById('importPreview');
+    const tableDiv = document.getElementById('previewTable');
+    
+    if (data.length === 0) {
+        tableDiv.innerHTML = '<p>Không có dữ liệu để hiển thị</p>';
+        return;
+    }
+    
+    const headers = Object.keys(data[0]);
+    let tableHTML = `
+        <table class="table">
+            <thead>
+                <tr>
+                    ${headers.map(header => `<th>${header}</th>`).join('')}
+                </tr>
+            </thead>
+            <tbody>
+                ${data.slice(0, 10).map(row => `
+                    <tr>
+                        ${headers.map(header => `<td>${row[header] || ''}</td>`).join('')}
+                    </tr>
+                `).join('')}
+            </tbody>
+        </table>
+    `;
+    
+    if (data.length > 10) {
+        tableHTML += `<p class="text-center">Và ${data.length - 10} bản ghi khác...</p>`;
+    }
+    
+    tableDiv.innerHTML = tableHTML;
+    previewDiv.style.display = 'block';
+}
+
+async function confirmImport() {
+    try {
+        const response = await fetch('/api/students/import/confirm', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                data: importedData,
+                skipDuplicates: document.getElementById('skipDuplicates').checked
+            })
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+            if (window.dashboardApp) {
+                window.dashboardApp.showAlert('success', `Import thành công ${result.imported} sinh viên!`);
+            }
+            closeImportModal();
+            // Reload page to show new data
+            window.location.reload();
+        } else {
+            throw new Error(result.error || 'Có lỗi xảy ra khi import');
+        }
+    } catch (error) {
+        console.error('Error confirming import:', error);
+        if (window.dashboardApp) {
+            window.dashboardApp.showAlert('error', 'Có lỗi xảy ra: ' + error.message);
+        }
+    }
+}
+
+function cancelImport() {
+    document.getElementById('importPreview').style.display = 'none';
+    importedData = [];
+}
+
+function downloadTemplate(type) {
+    const link = document.createElement('a');
+    link.href = `/api/students/template?type=${type}`;
+    link.download = `student_template.${type === 'excel' ? 'xlsx' : 'csv'}`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+}
+
+// Initialize page
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('Page loaded, studentsData:', studentsData);
+    console.log('Number of students:', studentsData ? studentsData.length : 0);
+    
+    // Check if modal exists
+    const modal = document.getElementById('studentModal');
+    console.log('Modal found:', modal ? 'Yes' : 'No');
+    
+    // Test click handlers
+    const viewButtons = document.querySelectorAll('button[onclick*="viewStudent"]');
+    const editButtons = document.querySelectorAll('button[onclick*="editStudent"]');
+    console.log('View buttons found:', viewButtons.length);
+    console.log('Edit buttons found:', editButtons.length);
+});
+
+// Close modals when clicking outside
+document.addEventListener('click', function(e) {
+    if (e.target.classList.contains('modal')) {
+        e.target.classList.remove('show');
+    }
+});
+</script>
+
+<!-- Student Detail Modal -->
+<div id="studentModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3 class="modal-title">Thông tin chi tiết sinh viên</h3>
+            <button class="modal-close" onclick="closeModal()">&times;</button>
+        </div>
+        <div class="modal-body">
+            <div id="studentDetails">
+                <!-- Student details will be populated here -->
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-secondary" onclick="closeModal()">Đóng</button>
+            <button class="btn btn-primary" onclick="editCurrentStudent()">Chỉnh sửa</button>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

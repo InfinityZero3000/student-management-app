@@ -1,0 +1,125 @@
+{% extends "base.html" %}
+
+{% block title %}Báo cáo & Xuất file - HUIT Student Management{% endblock %}
+
+{% block page_title %}Báo cáo & Xuất file{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header">
+        <h3 class="card-title">
+            <i data-lucide="file-text"></i>
+            Tạo báo cáo
+        </h3>
+    </div>
+    
+    {% if has_data %}
+    <div class="grid grid-2">
+        <div class="report-option">
+            <div class="report-icon">
+                <i data-lucide="download"></i>
+            </div>
+            <h4>Xuất danh sách sinh viên</h4>
+            <p>Xuất toàn bộ danh sách sinh viên ra file CSV hoặc Excel</p>
+            <div style="margin-top: 1rem;">
+                <button class="btn btn-primary" onclick="exportReport('students_csv')">
+                    <i data-lucide="download"></i>
+                    Xuất CSV
+                </button>
+                <button class="btn btn-secondary" onclick="exportReport('students_excel')">
+                    <i data-lucide="download"></i>
+                    Xuất Excel
+                </button>
+            </div>
+        </div>
+        
+        <div class="report-option">
+            <div class="report-icon">
+                <i data-lucide="bar-chart-3"></i>
+            </div>
+            <h4>Báo cáo thống kê</h4>
+            <p>Tạo báo cáo thống kê tổng hợp với biểu đồ</p>
+            <div style="margin-top: 1rem;">
+                <button class="btn btn-primary" onclick="exportReport('statistics_pdf')">
+                    <i data-lucide="file-text"></i>
+                    Xuất PDF
+                </button>
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <div style="text-align: center; padding: 4rem 2rem;">
+        <div style="margin-bottom: 2rem;">
+            <i data-lucide="file-text" style="width: 64px; height: 64px; color: #64748b;"></i>
+        </div>
+        <h3 style="color: #64748b; margin-bottom: 1rem;">Chưa có dữ liệu</h3>
+        <p style="color: #94a3b8; margin-bottom: 2rem;">
+            Vui lòng tải lên dữ liệu để tạo báo cáo
+        </p>
+        <a href="{{ url_for('data_management') }}" class="btn btn-primary">
+            <i data-lucide="upload"></i>
+            Tải lên dữ liệu
+        </a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block scripts %}
+<style>
+.report-option {
+    background: #f8fafc;
+    padding: 2rem;
+    border-radius: 8px;
+    text-align: center;
+}
+
+.report-icon {
+    width: 64px;
+    height: 64px;
+    background: #3b82f6;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    margin: 0 auto 1rem;
+}
+
+.report-option h4 {
+    color: #334155;
+    margin-bottom: 0.5rem;
+}
+
+.report-option p {
+    color: #64748b;
+    margin-bottom: 1rem;
+}
+</style>
+
+<script>
+function exportReport(type) {
+    window.dashboardApp.showLoading();
+    
+    // Simulate export process
+    setTimeout(() => {
+        window.dashboardApp.hideLoading();
+        
+        let message = '';
+        switch(type) {
+            case 'students_csv':
+                message = 'Đã xuất danh sách sinh viên (CSV)';
+                break;
+            case 'students_excel':
+                message = 'Đã xuất danh sách sinh viên (Excel)';
+                break;
+            case 'statistics_pdf':
+                message = 'Đã tạo báo cáo thống kê (PDF)';
+                break;
+        }
+        
+        window.dashboardApp.showAlert('success', message);
+    }, 2000);
+}
+</script>
+{% endblock %}

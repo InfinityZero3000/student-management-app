@@ -1,0 +1,362 @@
+{% extends "base.html" %}
+
+{% block title %}Thống kê chi tiết - HUIT Student Management{% endblock %}
+
+{% block page_title %}Thống kê chi tiết{% endblock %}
+
+{% block content %}
+<!-- Tổng quan thống kê -->
+<div class="grid grid-4">
+    <div class="card metric-card">
+        <div class="metric-icon" style="background-color: #2594e9ff;">
+            <i data-lucide="users"></i>
+        </div>
+        <div class="metric-content">
+            <h3 id="totalStudentsDetail">0</h3>
+            <p>Tổng sinh viên</p>
+        </div>
+    </div>
+    <div class="card metric-card">
+        <div class="metric-icon" style="background-color: #10b981;">
+            <i data-lucide="graduation-cap"></i>
+        </div>
+        <div class="metric-content">
+            <h3 id="averageGPA">0</h3>
+            <p>GPA trung bình</p>
+        </div>
+    </div>
+    <div class="card metric-card">
+        <div class="metric-icon" style="background-color: #f59e0b;">
+            <i data-lucide="trending-up"></i>
+        </div>
+        <div class="metric-content">
+            <h3 id="passRateDetail">0%</h3>
+            <p>Tỷ lệ qua môn</p>
+        </div>
+    </div>
+    <div class="card metric-card">
+        <div class="metric-icon" style="background-color: #8b5cf6;">
+            <i data-lucide="award"></i>
+        </div>
+        <div class="metric-content">
+            <h3 id="excellentCount">0</h3>
+            <p>Sinh viên xuất sắc</p>
+        </div>
+    </div>
+</div>
+
+<!-- Phân tích chi tiết -->
+<div class="grid grid-2">
+    <!-- Phân bố điểm số chi tiết -->
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title">
+                <i data-lucide="bar-chart-3"></i>
+                Phân bố điểm số chi tiết
+            </h3>
+        </div>
+        <div style="height: 350px; position: relative;">
+            <canvas id="detailedScoreChart"></canvas>
+        </div>
+        <div class="chart-stats" id="scoreStats">
+            <!-- Stats will be populated by JavaScript -->
+        </div>
+    </div>
+
+    <!-- Phân tích xu hướng -->
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title">
+                <i data-lucide="trending-up"></i>
+                Xu hướng học tập
+            </h3>
+        </div>
+        <div style="height: 350px; position: relative;">
+            <canvas id="trendChart"></canvas>
+        </div>
+    </div>
+</div>
+
+<!-- Phân tích theo lớp -->
+<div class="card">
+    <div class="card-header">
+        <h3 class="card-title">
+            <i data-lucide="school"></i>
+            Phân tích theo lớp học
+        </h3>
+        <div class="card-actions">
+            <select id="classFilter" class="form-select">
+                <option value="">Tất cả lớp</option>
+            </select>
+        </div>
+    </div>
+    <div class="grid grid-2">
+        <div style="height: 400px; position: relative;">
+            <canvas id="classPerformanceChart"></canvas>
+        </div>
+        <div id="classAnalysis" class="analysis-panel">
+            <h4> Phân tích chi tiết lớp</h4>
+            <div id="classMetrics">
+                <!-- Class metrics will be populated here -->
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Bảng xếp hạng -->
+<div class="grid grid-2">
+    <!-- Top performers -->
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title">
+                <i data-lucide="trophy"></i>
+                 TOP sinh viên xuất sắc
+            </h3>
+        </div>
+        <div id="topStudents" class="ranking-list">
+            <!-- Top students will be populated here -->
+        </div>
+    </div>
+
+    <!-- Bottom performers -->
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title">
+                <i data-lucide="alert-triangle"></i>
+                Sinh viên cần hỗ trợ
+            </h3>
+        </div>
+        <div id="lowPerformers" class="ranking-list">
+            <!-- Low performers will be populated here -->
+        </div>
+    </div>
+</div>
+
+<!-- Thống kê nâng cao -->
+<div class="card">
+    <div class="card-header">
+        <h3 class="card-title">
+            <i data-lucide="calculator"></i>
+            Thống kê nâng cao
+        </h3>
+    </div>
+    <div class="grid grid-3">
+        <div class="stat-box">
+            <h4>Độ lệch chuẩn</h4>
+            <div class="stat-value" id="standardDeviation">0</div>
+            <p class="stat-desc">Mức độ phân tán điểm số</p>
+        </div>
+        <div class="stat-box">
+            <h4>Hệ số biến thiên</h4>
+            <div class="stat-value" id="coefficientVariation">0%</div>
+            <p class="stat-desc">Tính đồng đều của điểm</p>
+        </div>
+        <div class="stat-box">
+            <h4>Skewness</h4>
+            <div class="stat-value" id="skewness">0</div>
+            <p class="stat-desc">Độ lệch phân bố</p>
+        </div>
+    </div>
+    
+    <div class="grid grid-2" style="margin-top: 2rem;">
+        <div>
+            <h4>Phân tích tứ phân vị (Quartiles)</h4>
+            <div id="quartileAnalysis" class="quartile-container">
+                <!-- Quartile analysis will be populated here -->
+            </div>
+        </div>
+        <div>
+            <h4>Phân tích outliers</h4>
+            <div id="outlierAnalysis" class="outlier-container">
+                <!-- Outlier analysis will be populated here -->
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Khuyến nghị -->
+<div class="card">
+    <div class="card-header">
+        <h3 class="card-title">
+            <i data-lucide="lightbulb"></i>
+            Khuyến nghị và đánh giá
+        </h3>
+    </div>
+    <div id="recommendations" class="recommendations-panel">
+        <!-- AI recommendations will be populated here -->
+    </div>
+</div>
+
+<style>
+.metric-card {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.metric-icon {
+    width: 60px;
+    height: 60px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+}
+
+.metric-content h3 {
+    font-size: 2rem;
+    font-weight: bold;
+    margin: 0;
+    color: #1e293b;
+}
+
+.metric-content p {
+    margin: 0;
+    color: #64748b;
+    font-size: 0.9rem;
+}
+
+.chart-stats {
+    padding: 1rem;
+    background: #f8fafc;
+    border-top: 1px solid #e2e8f0;
+    margin-top: 1rem;
+}
+
+.card-actions {
+    display: flex;
+    gap: 1rem;
+}
+
+.form-select {
+    padding: 0.5rem 1rem;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    background: white;
+    min-width: 150px;
+}
+
+.analysis-panel {
+    padding: 1rem;
+    background: #f8fafc;
+    border-radius: 8px;
+}
+
+.analysis-panel h4 {
+    margin-bottom: 1rem;
+    color: #1e293b;
+}
+
+.ranking-list {
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.ranking-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.ranking-item:last-child {
+    border-bottom: none;
+}
+
+.ranking-number {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    color: white;
+    font-size: 0.9rem;
+}
+
+.ranking-number.gold { background: #f59e0b; }
+.ranking-number.silver { background: #6b7280; }
+.ranking-number.bronze { background: #92400e; }
+.ranking-number.default { background: #2594e9ff; }
+
+.stat-box {
+    text-align: center;
+    padding: 1.5rem;
+    background: #f8fafc;
+    border-radius: 8px;
+    border: 1px solid #e2e8f0;
+}
+
+.stat-box h4 {
+    margin-bottom: 0.5rem;
+    color: #1e293b;
+    font-size: 1rem;
+}
+
+.stat-value {
+    font-size: 2rem;
+    font-weight: bold;
+    color: #2594e9ff;
+    margin-bottom: 0.5rem;
+}
+
+.stat-desc {
+    color: #64748b;
+    font-size: 0.9rem;
+    margin: 0;
+}
+
+.quartile-container,
+.outlier-container {
+    padding: 1rem;
+    background: #f8fafc;
+    border-radius: 8px;
+    border: 1px solid #e2e8f0;
+}
+
+.recommendations-panel {
+    padding: 1rem;
+}
+
+.recommendation-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    padding: 1rem;
+    background: #f8fafc;
+    border-radius: 8px;
+    margin-bottom: 1rem;
+    border-left: 4px solid #2594e9ff;
+}
+
+.recommendation-icon {
+    width: 24px;
+    height: 24px;
+    color: #2594e9ff;
+    flex-shrink: 0;
+}
+
+.recommendation-content h5 {
+    margin-bottom: 0.5rem;
+    color: #1e293b;
+}
+
+.recommendation-content p {
+    margin: 0;
+    color: #64748b;
+    line-height: 1.5;
+}
+</style>
+
+<script>
+// Statistics page specific JavaScript will be handled in dashboard.js
+document.addEventListener('DOMContentLoaded', function() {
+    if (typeof window.statisticsApp !== 'undefined') {
+        window.statisticsApp.init();
+    }
+});
+</script>
+{% endblock %}

@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}HUIT Student Dashboard{% endblock %}</title>
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+    
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    
+    {% block extra_head %}{% endblock %}
+</head>
+<body>
+    <!-- Main Container -->
+    <div class="app-container">
+        <!-- Sidebar -->
+        <nav class="sidebar">
+            <!-- Header -->
+            <div class="sidebar-header">
+                <div class="sidebar-brand">
+                    <span style="font-size: 20px;"> HUIT Academic <br>Grade Analysis</span>
+                </div>
+            </div>
+            
+
+            <!-- Navigation Menu -->
+            <ul class="nav-menu">
+                <li class="nav-item">
+                    <a href="{{ url_for('index') }}" class="nav-link {% if current_page == 'dashboard' %}active{% endif %}">
+                        <i data-lucide="home" class="nav-icon"></i>
+                        <span>Dashboard</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="{{ url_for('statistics') }}" class="nav-link {% if current_page == 'statistics' %}active{% endif %}">
+                        <i data-lucide="bar-chart-3" class="nav-icon"></i>
+                        <span>Thống kê chi tiết</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="{{ url_for('students') }}" class="nav-link {% if current_page == 'students' %}active{% endif %}">
+                        <i data-lucide="users" class="nav-icon"></i>
+                        <span>Danh sách sinh viên</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="{{ url_for('search') }}" class="nav-link {% if current_page == 'search' %}active{% endif %}">
+                        <i data-lucide="search" class="nav-icon"></i>
+                        <span>Tìm kiếm cơ bản</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="{{ url_for('advanced_search') }}" class="nav-link {% if current_page == 'advanced_search' %}active{% endif %}">
+                        <i data-lucide="zap" class="nav-icon"></i>
+                        <span>Tìm kiếm nâng cao</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="{{ url_for('compare') }}" class="nav-link {% if current_page == 'compare' %}active{% endif %}">
+                        <i data-lucide="git-compare" class="nav-icon"></i>
+                        <span>So sánh dữ liệu</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="{{ url_for('alerts') }}" class="nav-link {% if current_page == 'alerts' %}active{% endif %}">
+                        <i data-lucide="alert-triangle" class="nav-icon"></i>
+                        <span>Cảnh báo học vụ</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="{{ url_for('reports') }}" class="nav-link {% if current_page == 'reports' %}active{% endif %}">
+                        <i data-lucide="file-text" class="nav-icon"></i>
+                        <span>Báo cáo & Xuất file</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="{{ url_for('data_management') }}" class="nav-link {% if current_page == 'data_management' %}active{% endif %}">
+                        <i data-lucide="database" class="nav-icon"></i>
+                        <span>Quản lý dữ liệu</span>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+        
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Top Navigation -->
+            <header class="top-nav">
+                <div class="nav-left">
+                    <h1 class="page-title">{% block page_title %}Dashboard{% endblock %}</h1>
+                </div>
+                <div class="nav-right">
+                    <div class="search-box">
+                        <i data-lucide="search" class="search-icon"></i>
+                        <input type="text" placeholder="Tìm kiếm..." id="globalSearch">
+                    </div>
+                    <div class="user-info">
+                        <div class="date-time">
+                            <div class="date" id="currentDate"></div>
+                            <div class="time" id="currentTime"></div>
+                        </div>
+                        <div class="user-avatar">
+                            <i data-lucide="user" class="avatar-icon"></i>
+                        </div>
+                    </div>
+                </div>
+            </header>
+            
+            <!-- Page Content -->
+            <div class="content-wrapper">
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                        <div class="flash-messages">
+                            {% for category, message in messages %}
+                                <div class="alert alert-{{ category }}">
+                                    <i data-lucide="{% if category == 'error' %}x-circle{% elif category == 'success' %}check-circle{% else %}info{% endif %}" class="alert-icon"></i>
+                                    {{ message }}
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                {% endwith %}
+                
+                {% block content %}{% endblock %}
+            </div>
+        </main>
+    </div>
+    
+    <!-- Loading Overlay -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-spinner">
+            <div class="spinner"></div>
+            <div class="loading-text">Đang tải...</div>
+        </div>
+    </div>
+    
+    <!-- Scripts -->
+    <script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+    {% block scripts %}{% endblock %}
+    
+    <script>
+        // Initialize Lucide icons
+        lucide.createIcons();
+        
+        // Update date/time
+        function updateDateTime() {
+            const now = new Date();
+            document.getElementById('currentDate').textContent = now.toLocaleDateString('vi-VN');
+            document.getElementById('currentTime').textContent = now.toLocaleTimeString('vi-VN', {hour: '2-digit', minute: '2-digit'});
+        }
+        
+        updateDateTime();
+        setInterval(updateDateTime, 60000); // Update every minute
+        
+        // Load data info
+        async function loadDataInfo() {
+            try {
+                const response = await fetch('/api/dashboard-data');
+                if (response.ok) {
+                    const data = await response.json();
+                    const statsEl = document.getElementById('dataStats');
+                    statsEl.innerHTML = `
+                        <div>Sinh viên: ${data.total_students || 0}</div>
+                        <div>Lớp: ${data.total_classes || 0}</div>
+                        <div>Điểm TB: ${data.average_score || 0}</div>
+                        <div>Tỷ lệ đậu: ${data.pass_rate || 0}%</div>
+                        <div>Cập nhật: ${data.recent_updates || 'N/A'}</div>
+                    `;
+                }
+            } catch (error) {
+                console.error('Error loading data info:', error);
+            }
+        }
+        
+        // Load data info on page load
+        document.addEventListener('DOMContentLoaded', loadDataInfo);
+    </script>
+</body>
+</html>

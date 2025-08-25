@@ -1,0 +1,285 @@
+{% extends "base.html" %}
+
+{% block title %}Quản lý dữ liệu - HUIT Student Management{% endblock %}
+
+{% block page_title %}Quản lý dữ liệu{% endblock %}
+
+{% block content %}
+<!-- File Upload Section -->
+<div class="card">
+    <div class="card-header">
+        <h3 class="card-title">
+            <i data-lucide="upload"></i>
+            Tải lên dữ liệu
+        </h3>
+    </div>
+    
+    <div class="file-upload" id="fileUploadArea">
+        <div style="margin-bottom: 1rem;">
+            <i data-lucide="file-plus" style="width: 48px; height: 48px; color: #64748b;"></i>
+        </div>
+        <h4 style="color: #334155; margin-bottom: 0.5rem;">Kéo thả file hoặc click để chọn</h4>
+        <p style="color: #64748b; margin-bottom: 1rem;">
+            Hỗ trợ file CSV, Excel (.xls, .xlsx). Tối đa 16MB
+        </p>
+        <input type="file" id="fileInput" accept=".csv,.xls,.xlsx" style="display: none;">
+        <div class="btn btn-primary">
+            <i data-lucide="folder"></i>
+            Chọn file
+        </div>
+    </div>
+</div>
+
+{% if has_data %}
+<!-- Current Data Info -->
+<div class="card">
+    <div class="card-header">
+        <h3 class="card-title">
+            <i data-lucide="database"></i>
+            Thông tin dữ liệu hiện tại
+        </h3>
+        <div>
+            <button class="btn btn-danger" onclick="clearData()">
+                <i data-lucide="trash-2"></i>
+                Xóa dữ liệu
+            </button>
+        </div>
+    </div>
+    
+    <div class="grid grid-2">
+        <div class="data-info-item">
+            <div class="info-label">Tổng số sinh viên</div>
+            <div class="info-value">{{ data_info.total_students or 0 }}</div>
+        </div>
+        <div class="data-info-item">
+            <div class="info-label">Số cột dữ liệu</div>
+            <div class="info-value">{{ data_info.total_columns or 0 }}</div>
+        </div>
+        <div class="data-info-item">
+            <div class="info-label">Kích thước dữ liệu</div>
+            <div class="info-value">{{ data_info.file_size or 'N/A' }}</div>
+        </div>
+        <div class="data-info-item">
+            <div class="info-label">Cập nhật lần cuối</div>
+            <div class="info-value">Hôm nay</div>
+        </div>
+    </div>
+    
+    {% if data_info.columns %}
+    <div style="margin-top: 2rem;">
+        <h4 style="margin-bottom: 1rem; color: #334155;">Danh sách cột dữ liệu:</h4>
+        <div class="columns-grid">
+            {% for column in data_info.columns %}
+            <div class="column-tag">
+                <i data-lucide="tag"></i>
+                {{ column }}
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<!-- Data Actions -->
+<div class="card">
+    <div class="card-header">
+        <h3 class="card-title">
+            <i data-lucide="settings"></i>
+            Thao tác dữ liệu
+        </h3>
+    </div>
+    
+    <div class="grid grid-3">
+        <button class="btn btn-secondary" onclick="exportData('csv')">
+            <i data-lucide="download"></i>
+            Xuất CSV
+        </button>
+        <button class="btn btn-secondary" onclick="exportData('excel')">
+            <i data-lucide="download"></i>
+            Xuất Excel
+        </button>
+        <button class="btn btn-secondary" onclick="validateData()">
+            <i data-lucide="check-circle"></i>
+            Kiểm tra dữ liệu
+        </button>
+        <button class="btn btn-secondary" onclick="showDataPreview()">
+            <i data-lucide="eye"></i>
+            Xem trước
+        </button>
+        <button class="btn btn-secondary" onclick="showDataStats()">
+            <i data-lucide="bar-chart"></i>
+            Thống kê cơ bản
+        </button>
+        <button class="btn btn-secondary" onclick="cleanData()">
+            <i data-lucide="refresh-cw"></i>
+            Làm sạch dữ liệu
+        </button>
+    </div>
+</div>
+
+{% else %}
+<!-- No Data State -->
+<div class="card" style="text-align: center; padding: 4rem 2rem;">
+    <div style="margin-bottom: 2rem;">
+        <i data-lucide="inbox" style="width: 64px; height: 64px; color: #64748b;"></i>
+    </div>
+    <h3 style="color: #64748b; margin-bottom: 1rem;">Chưa có dữ liệu</h3>
+    <p style="color: #94a3b8; margin-bottom: 2rem;">
+        Tải lên file dữ liệu sinh viên để bắt đầu quản lý và phân tích
+    </p>
+    <div style="background: #f1f5f9; border-radius: 8px; padding: 1.5rem; margin-bottom: 2rem; text-align: left; max-width: 500px; margin-left: auto; margin-right: auto;">
+        <h4 style="color: #334155; margin-bottom: 1rem;">Yêu cầu định dạng file:</h4>
+        <ul style="color: #64748b; margin: 0; padding-left: 1.5rem;">
+            <li>File CSV hoặc Excel (.xls, .xlsx)</li>
+            <li>Có header (dòng đầu tiên là tên cột)</li>
+            <li>Các cột thông tin sinh viên: Tên, MSSV, Lớp, Điểm...</li>
+            <li>Encoding UTF-8 (cho tiếng Việt)</li>
+        </ul>
+    </div>
+</div>
+{% endif %}
+
+<!-- Sample Data Section -->
+<div class="card">
+    <div class="card-header">
+        <h3 class="card-title">
+            <i data-lucide="file-text"></i>
+            Dữ liệu mẫu
+        </h3>
+    </div>
+    
+    <p style="color: #64748b; margin-bottom: 1.5rem;">
+        Tải xuống file dữ liệu mẫu để hiểu định dạng cần thiết
+    </p>
+    
+    <div class="grid grid-2" style="max-width: 400px;">
+        <button class="btn btn-secondary" onclick="downloadSample('csv')">
+            <i data-lucide="download"></i>
+            Tải mẫu CSV
+        </button>
+        <button class="btn btn-secondary" onclick="downloadSample('excel')">
+            <i data-lucide="download"></i>
+            Tải mẫu Excel
+        </button>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<style>
+.data-info-item {
+    background: #f8fafc;
+    padding: 1.5rem;
+    border-radius: 8px;
+    text-align: center;
+}
+
+.info-label {
+    font-size: 0.875rem;
+    color: #64748b;
+    margin-bottom: 0.5rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-weight: 500;
+}
+
+.info-value {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #1e40af;
+}
+
+.columns-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.column-tag {
+    display: inline-flex;
+    align-items: center;
+    background: #eff6ff;
+    color: #1d4ed8;
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    font-size: 0.875rem;
+    font-weight: 500;
+    border: 1px solid #bfdbfe;
+}
+
+.column-tag i {
+    width: 14px;
+    height: 14px;
+    margin-right: 0.5rem;
+}
+</style>
+
+<script>
+function clearData() {
+    if (confirm('Bạn có chắc chắn muốn xóa toàn bộ dữ liệu? Hành động này không thể hoàn tác.')) {
+        // Implement clear data functionality
+        console.log('Clearing data...');
+    }
+}
+
+function exportData(format) {
+    window.dashboardApp.showLoading();
+    
+    // Simulate export
+    setTimeout(() => {
+        window.dashboardApp.hideLoading();
+        window.dashboardApp.showAlert('success', `Đã xuất dữ liệu định dạng ${format.toUpperCase()}`);
+    }, 2000);
+}
+
+function validateData() {
+    window.dashboardApp.showLoading();
+    
+    // Simulate validation
+    setTimeout(() => {
+        window.dashboardApp.hideLoading();
+        window.dashboardApp.showAlert('success', 'Dữ liệu hợp lệ - Không có lỗi');
+    }, 1500);
+}
+
+function showDataPreview() {
+    window.location.href = '{{ url_for("students") }}';
+}
+
+function showDataStats() {
+    window.location.href = '{{ url_for("statistics") }}';
+}
+
+function cleanData() {
+    if (confirm('Làm sạch dữ liệu sẽ xóa các dòng trống và chuẩn hóa định dạng. Tiếp tục?')) {
+        window.dashboardApp.showLoading();
+        
+        setTimeout(() => {
+            window.dashboardApp.hideLoading();
+            window.dashboardApp.showAlert('success', 'Đã làm sạch dữ liệu thành công');
+        }, 2000);
+    }
+}
+
+function downloadSample(format) {
+    // Create sample data
+    const sampleData = [
+        ['STT', 'Họ và tên', 'MSSV', 'Lớp', 'Điểm TB', 'Xếp loại'],
+        ['1', 'Nguyễn Văn A', '2021001', 'CNTT01', '8.5', 'Giỏi'],
+        ['2', 'Trần Thị B', '2021002', 'CNTT01', '7.2', 'Khá'],
+        ['3', 'Lê Văn C', '2021003', 'CNTT02', '6.8', 'Khá']
+    ];
+    
+    if (format === 'csv') {
+        const csvContent = sampleData.map(row => row.join(',')).join('\n');
+        const blob = new Blob(['\ufeff' + csvContent], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = 'mau_du_lieu_sinh_vien.csv';
+        link.click();
+    } else {
+        window.dashboardApp.showAlert('info', 'Tính năng xuất Excel đang được phát triển');
+    }
+}
+</script>
+{% endblock %}

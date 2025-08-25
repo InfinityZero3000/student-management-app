@@ -1,0 +1,235 @@
+{% extends "base.html" %}
+
+{% block title %}HUIT Student Management{% endblock %}
+
+{% block page_title %}Dashboard{% endblock %}
+
+{% block content %}
+<!-- Overview Metrics -->
+<div class="grid grid-4" style="margin-bottom: 2rem;">
+    <div class="metric-card">
+        <div class="metric-icon blue">
+            <i data-lucide="users"></i>
+        </div>
+        <div class="metric-value" id="totalStudents">{{ total_students or 0 }}</div>
+        <div class="metric-label">Tổng sinh viên</div>
+    </div>
+    
+    <div class="metric-card">
+        <div class="metric-icon green">
+            <i data-lucide="building"></i>
+        </div>
+        <div class="metric-value" id="totalClasses">{{ total_classes or 0 }}</div>
+        <div class="metric-label">Số lớp</div>
+    </div>
+    
+    <div class="metric-card">
+        <div class="metric-icon purple">
+            <i data-lucide="target"></i>
+        </div>
+        <div class="metric-value" id="averageScore">{{ "%.1f"|format(average_score or 0) }}</div>
+        <div class="metric-label">Điểm trung bình</div>
+    </div>
+    
+    <div class="metric-card">
+        <div class="metric-icon orange">
+            <i data-lucide="check-circle"></i>
+        </div>
+        <div class="metric-value" id="passRate">{{ "%.1f"|format(pass_rate or 0) }}%</div>
+        <div class="metric-label">Tỷ lệ đậu</div>
+    </div>
+</div>
+
+{% if has_data %}
+<!-- Charts Section -->
+<div class="grid grid-2" style="margin-bottom: 2rem;">
+    <!-- Class Distribution Chart -->
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title">
+                <i data-lucide="pie-chart"></i>
+                Phân bố theo lớp
+            </h3>
+        </div>
+        <div style="height: 300px; position: relative;">
+            <canvas id="classDistributionChart"></canvas>
+        </div>
+    </div>
+    
+    <!-- Score Distribution Chart -->
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title">
+                <i data-lucide="bar-chart-3"></i>
+                Phân bố điểm số
+            </h3>
+        </div>
+        <div style="height: 300px; position: relative;">
+            <canvas id="scoreDistributionChart"></canvas>
+        </div>
+    </div>
+</div>
+
+<!-- Quick Actions -->
+<div class="card">
+    <div class="card-header">
+        <h3 class="card-title">
+            <i data-lucide="zap"></i>
+            Thao tác nhanh
+        </h3>
+    </div>
+    <div class="grid grid-3">
+        <a href="{{ url_for('students') }}" class="btn btn-primary">
+            <i data-lucide="users"></i>
+            Xem danh sách sinh viên
+        </a>
+        <a href="{{ url_for('search') }}" class="btn btn-secondary">
+            <i data-lucide="search"></i>
+            Tìm kiếm nâng cao
+        </a>
+        <a href="{{ url_for('reports') }}" class="btn btn-secondary">
+            <i data-lucide="download"></i>
+            Xuất báo cáo
+        </a>
+    </div>
+</div>
+
+<!-- Recent Activity -->
+<div class="card">
+    <div class="card-header">
+        <h3 class="card-title">
+            <i data-lucide="clock"></i>
+            Hoạt động gần đây
+        </h3>
+    </div>
+    <div class="activity-list">
+        <div class="activity-item">
+            <div class="activity-icon">
+                <i data-lucide="upload"></i>
+            </div>
+            <div class="activity-content">
+                <div class="activity-title">Cập nhật dữ liệu sinh viên</div>
+                <div class="activity-time">{{ recent_updates or 'Chưa cập nhật' }}</div>
+            </div>
+        </div>
+        <div class="activity-item">
+            <div class="activity-icon">
+                <i data-lucide="file-text"></i>
+            </div>
+            <div class="activity-content">
+                <div class="activity-title">Tạo báo cáo tổng hợp</div>
+                <div class="activity-time">Hôm qua, 14:30</div>
+            </div>
+        </div>
+        <div class="activity-item">
+            <div class="activity-icon">
+                <i data-lucide="users"></i>
+            </div>
+            <div class="activity-content">
+                <div class="activity-title">Thêm {{ total_students or 0 }} sinh viên mới</div>
+                <div class="activity-time">Tuần trước</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% else %}
+<!-- No Data State -->
+<div class="card" style="text-align: center; padding: 4rem 2rem;">
+    <div style="margin-bottom: 2rem;">
+        <i data-lucide="database" style="width: 64px; height: 64px; color: #64748b;"></i>
+    </div>
+    <h3 style="color: #64748b; margin-bottom: 1rem;">Chưa có dữ liệu</h3>
+    <p style="color: #94a3b8; margin-bottom: 2rem;">
+        Vui lòng tải lên file dữ liệu để bắt đầu sử dụng dashboard
+    </p>
+    <a href="{{ url_for('data_management') }}" class="btn btn-primary">
+        <i data-lucide="upload"></i>
+        Tải lên dữ liệu
+    </a>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block scripts %}
+<style>
+.activity-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.activity-item {
+    display: flex;
+    align-items: center;
+    padding: 1rem;
+    background: #f8fafc;
+    border-radius: 8px;
+    border-left: 4px solid #3b82f6;
+}
+
+.activity-icon {
+    width: 40px;
+    height: 40px;
+    background: #3b82f6;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    margin-right: 1rem;
+}
+
+.activity-icon i {
+    width: 18px;
+    height: 18px;
+}
+
+.activity-content {
+    flex: 1;
+}
+
+.activity-title {
+    font-weight: 500;
+    color: #334155;
+    margin-bottom: 0.25rem;
+}
+
+.activity-time {
+    font-size: 0.875rem;
+    color: #64748b;
+}
+</style>
+
+<script>
+// Load and update dashboard data dynamically
+async function loadDashboardData() {
+    try {
+        const response = await fetch('/api/dashboard-data');
+        if (response.ok) {
+            const data = await response.json();
+            
+            // Update metric cards
+            document.getElementById('totalStudents').textContent = data.total_students || 0;
+            document.getElementById('totalClasses').textContent = data.total_classes || 0;
+            document.getElementById('averageScore').textContent = (data.average_score || 0).toFixed(1);
+            document.getElementById('passRate').textContent = (data.pass_rate || 0).toFixed(1) + '%';
+            
+            console.log('Dashboard data updated from database:', data);
+        } else {
+            console.error('Failed to fetch dashboard data');
+        }
+    } catch (error) {
+        console.error('Error loading dashboard data:', error);
+    }
+}
+
+// Load data on page load
+document.addEventListener('DOMContentLoaded', function() {
+    loadDashboardData();
+    
+    // Update every 30 seconds for real-time data
+    setInterval(loadDashboardData, 30000);
+});
+</script>
+{% endblock %}
