@@ -1,116 +1,72 @@
-# Ứng dụng Quản lý Sinh viên
+# Hệ thống Quản lý Sinh viên HUIT
 
-## Mô tả
-Ứng dụng web quản lý sinh viên được xây dựng bằng **Streamlit** với các tính năng:
-- Import dữ liệu từ CSV/DOCX
-- Tính điểm trung bình theo học kỳ
-- Tìm kiếm và lọc dữ liệu
-- Thống kê và biểu đồ
-- Xuất báo cáo Excel/CSV
+## Giới thiệu
+Hệ thống web quản lý sinh viên hiện đại được xây dựng bằng **Flask** với giao diện trực quan và các tính năng mạnh mẽ:
 
-## Cài đặt
+### ✨ Tính năng chính
+- 📊 **Dashboard thống kê**: Tổng quan dữ liệu sinh viên với biểu đồ trực quan
+- 🔍 **Tìm kiếm nâng cao**: Tìm kiếm chính xác theo MSSV, tên, lớp, ngày sinh
+- 📁 **Import đa định dạng**: Hỗ trợ CSV, DOCX, XLSX, TXT
+- 📈 **Thống kê chi tiết**: Phân tích điểm số, xếp loại, tỷ lệ đỗ
+- 📋 **Quản lý dữ liệu**: Xem, so sánh và xuất báo cáo
+- 🎯 **Tìm kiếm thông minh**: Algoritm tìm kiếm với độ chính xác cao
 
-### 1. Yêu cầu hệ thống
-- Python 3.8+
-- pip hoặc conda
+## Yêu cầu hệ thống
+- **Python**: 3.8 trở lên
+- **RAM**: Tối thiểu 2GB (khuyến nghị 4GB)
+- **Dung lượng**: 500MB trống
+- **Trình duyệt**: Chrome, Firefox, Safari, Edge (phiên bản mới)
 
-### 2. Cài đặt dependencies
+## Cài đặt nhanh
+
+### 1. Clone repository
 ```bash
+git clone https://github.com/InfinityZero3000/student-management-app.git
+cd student-management-app
+```
+
+### 2. Tạo môi trường ảo (khuyến nghị)
+```bash
+python -m venv .venv
+source .venv/bin/activate  # macOS/Linux
+# hoặc
+.venv\Scripts\activate     # Windows
+```
+
+### 3. Cài đặt dependencies
+```bash
+cd flask_app
 pip install -r requirements.txt
 ```
 
-### 3. Chạy ứng dụng
+### 4. Khởi chạy ứng dụng
 ```bash
-streamlit run app.py
+python server.py
 ```
 
-Ứng dụng sẽ mở tại: http://localhost:8501
+🌐 Truy cập: **http://127.0.0.1:5002**
 
 ## Cấu trúc dự án
 ```
 student-management-app/
-├── app.py                 # File chính của ứng dụng Streamlit
-├── data_processor.py      # Module xử lý dữ liệu
-├── file_handler.py        # Module xử lý file I/O
-├── requirements.txt       # Dependencies
-├── README.md             # Hướng dẫn sử dụng
-├── sample_data/          # Dữ liệu mẫu
-│   ├── sinh_vien_mau.csv
-│   └── diem_so_mau.csv
-└── docs/                 # Tài liệu
-    └── GUIDE.md
+├── flask_app/                    # Ứng dụng Flask chính
+│   ├── server.py                # Server chính
+│   ├── data_processor_new.py    # Xử lý dữ liệu nâng cao
+│   ├── file_handler_new.py      # Xử lý file I/O
+│   ├── data_comparator.py       # So sánh dữ liệu
+│   ├── requirements.txt         # Dependencies
+│   ├── static/                  # Tài nguyên tĩnh
+│   │   ├── css/style.css       # Stylesheet chính
+│   │   └── js/dashboard.js     # JavaScript frontend
+│   └── templates/              # Template HTML
+│       ├── base.html           # Template cơ sở
+│       ├── dashboard.html      # Trang chủ dashboard
+│       ├── advanced_search.html # Tìm kiếm nâng cao
+│       ├── compare.html        # So sánh dữ liệu
+│       ├── data_management.html # Quản lý dữ liệu
+│       └── statistics.html     # Thống kê
+├── data/                       # Dữ liệu mẫu
+│   └── huit_point_student.csv  # File dữ liệu HUIT (3221 records)
+└── README.md                   # Tài liệu này
 ```
 
-## Hướng dẫn sử dụng
-
-### 1. Chuẩn bị dữ liệu
-
-#### File danh sách sinh viên (CSV/DOCX):
-Cần có các cột:
-- `Ho_Ten`: Họ và tên sinh viên
-- `MSSV`: Mã số sinh viên (khóa chính)
-- `Lop`: Lớp học
-
-#### File điểm số (CSV):
-Cần có các cột:
-- `MSSV`: Mã số sinh viên (khóa ngoại)
-- `Mon_Hoc`: Tên môn học
-- `Diem`: Điểm số (0-10)
-- `Hoc_Ky`: Học kỳ (ví dụ: HK1_2023)
-
-### 2. Sử dụng ứng dụng
-
-1. **Upload files**: Chọn file sinh viên và file điểm từ sidebar
-2. **Xử lý dữ liệu**: Nhấn nút "Xử lý Dữ liệu"
-3. **Khám phá dữ liệu**: Sử dụng các tabs:
-   - **Danh sách**: Xem bảng sinh viên
-   - **Thống kê**: Xem các chỉ số thống kê
-   - **Biểu đồ**: Xem visualization
-   - **Xuất dữ liệu**: Tải về CSV/Excel
-
-### 3. Tính năng
-
-#### Tìm kiếm và lọc:
-- Tìm kiếm theo tên hoặc MSSV
-- Lọc theo lớp
-- Lọc theo học kỳ
-
-#### Thống kê:
-- Điểm trung bình theo lớp
-- Điểm trung bình theo học kỳ
-- Phân bố học lực
-
-#### Biểu đồ:
-- Bar chart điểm TB theo lớp
-- Histogram phân bố điểm
-- Box plot điểm theo học kỳ
-
-## Dữ liệu mẫu
-
-Trong ứng dụng có sẵn nút tạo dữ liệu mẫu để demo.
-
-## Lỗi thường gặp
-
-### 1. Lỗi import file
-- **Nguyên nhân**: File không đúng định dạng hoặc thiếu cột
-- **Giải pháp**: Kiểm tra lại cấu trúc file theo hướng dẫn
-
-### 2. Lỗi encoding
-- **Nguyên nhân**: File CSV không đúng encoding
-- **Giải pháp**: Lưu file CSV với encoding UTF-8
-
-### 3. Lỗi MSSV không khớp
-- **Nguyên nhân**: MSSV trong 2 file không trùng khớp
-- **Giải pháp**: Kiểm tra lại MSSV trong cả 2 file
-
-## Mở rộng
-
-Để mở rộng ứng dụng, có thể:
-1. Thêm authentication/phân quyền
-2. Kết nối database
-3. Thêm tính năng báo cáo nâng cao
-4. Deploy lên cloud (Streamlit Cloud, Heroku)
-
-## Liên hệ
-
-Nếu có vấn đề, vui lòng tạo issue trên GitHub hoặc liên hệ qua email.

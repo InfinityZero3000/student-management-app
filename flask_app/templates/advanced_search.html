@@ -811,14 +811,30 @@ class AdvancedSearchManager {
         matches.forEach((match, index) => {
             const row = document.createElement('tr');
 
+            // Get MSSV - try multiple field names
+            const mssv = this.getValue(match, 'mã sinh viên') || 
+                        this.getValue(match, 'Mã sinh viên') || 
+                        this.getValue(match, 'mssv') || 
+                        this.getValue(match, 'id') || '';
+
+            // Get class - try multiple field names  
+            const lop = this.getValue(match, 'lớp') || 
+                       this.getValue(match, 'Lớp') ||
+                       this.getValue(match, 'class') || '';
+
+            // Get rank - try multiple field names
+            const xepLoai = this.getValue(match, 'xếp loại') || 
+                           this.getValue(match, 'Xếp loại') ||
+                           this.getValue(match, 'rank') || '';
+
             row.innerHTML = `
                 <td>${index + 1}</td>
                 <td title="${match.input_value || ''}">${(match.input_value || '').substring(0, 20)}${(match.input_value || '').length > 20 ? '...' : ''}</td>
-                <td>${this.getValue(match, 'mssv') || this.getValue(match, 'id') || ''}</td>
+                <td>${mssv}</td>
                 <td>${this.getFullName(match)}</td>
-                <td>${this.getValue(match, 'lớp') || this.getValue(match, 'class') || ''}</td>
+                <td>${lop}</td>
                 <td>${this.getScore(match)}</td>
-                <td>${this.getValue(match, 'xếp loại') || this.getValue(match, 'rank') || ''}</td>
+                <td>${xepLoai}</td>
                 <td>
                     <button class="btn-detail" onclick="advancedSearchManager.showStudentDetail(${index})">
                         <i data-lucide="eye"></i> Xem
@@ -836,36 +852,63 @@ class AdvancedSearchManager {
     }
 
     getValue(match, keyPattern) {
-        // Find value by searching for key pattern (case-insensitive)
+        // First try exact match (case-insensitive)
         for (const [key, value] of Object.entries(match)) {
-            if (key.toLowerCase().includes(keyPattern.toLowerCase())) {
-                return value && value.toString().trim() !== 'nan' ? value : '';
+            if (key.toLowerCase() === keyPattern.toLowerCase()) {
+                return value && value.toString().trim() !== 'nan' && value.toString().trim() !== '' ? value : '';
             }
         }
+        
+        // Then try pattern matching
+        for (const [key, value] of Object.entries(match)) {
+            if (key.toLowerCase().includes(keyPattern.toLowerCase())) {
+                return value && value.toString().trim() !== 'nan' && value.toString().trim() !== '' ? value : '';
+            }
+        }
+        
+        // Handle Vietnamese specific mappings
+        const vietnameseMapping = {
+            'mssv': ['mã sinh viên', 'ma sinh vien'],
+            'lớp': ['lop', 'class'],
+            'điểm': ['diem', 'score'],
+            'tên': ['ten', 'name'],
+            'họ và tên': ['ho va ten', 'fullname'],
+            'xếp loại': ['xep loai', 'rank', 'classification']
+        };
+        
+        const mappings = vietnameseMapping[keyPattern.toLowerCase()] || [];
+        for (const mapping of mappings) {
+            for (const [key, value] of Object.entries(match)) {
+                if (key.toLowerCase().includes(mapping)) {
+                    return value && value.toString().trim() !== 'nan' && value.toString().trim() !== '' ? value : '';
+                }
+            }
+        }
+        
         return '';
     }
 
     getFullName(match) {
         // Try to get full name from various sources
-        const fullName = this.getValue(match, 'họ và tên') || this.getValue(match, 'tên');
+        let fullName = this.getValue(match, 'họ và tên') || this.getValue(match, 'fullname') || this.getValue(match, 'name');
         if (fullName) return fullName;
         
-        // Try to combine first and last name
-        const ho_dem = this.getValue(match, 'họ đệm');
-        const ten = this.getValue(match, 'tên');
+        // Try to combine first and last name from Vietnamese fields
+        const ho_dem = this.getValue(match, 'họ đệm') || this.getValue(match, 'ho dem');
+        const ten = this.getValue(match, 'tên') || this.getValue(match, 'ten');
         
         if (ho_dem && ten) {
             return `${ho_dem} ${ten}`.trim();
         }
         
-        return ho_dem || ten || '';
+        return ho_dem || ten || this.getValue(match, 'Tên') || this.getValue(match, 'Họ đệm') || '';
     }
 
     getScore(match) {
-        // Find score from various columns
-        const score10 = this.getValue(match, 'điểm 10');
-        const score4 = this.getValue(match, 'điểm 4');
-        const score = this.getValue(match, 'điểm');
+        // Find score from various columns, prioritize exact match first
+        const score10 = this.getValue(match, 'điểm 10') || this.getValue(match, 'Điểm 10');
+        const score4 = this.getValue(match, 'điểm 4') || this.getValue(match, 'Điểm 4');
+        const score = this.getValue(match, 'điểm') || this.getValue(match, 'Điểm');
         
         return score10 || score4 || score || '';
     }
