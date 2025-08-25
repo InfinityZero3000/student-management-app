@@ -3,6 +3,8 @@
 ## Overview
 A modern web-based student management system built with **Flask**, featuring an intuitive interface and powerful functionality:
 
+![alt text](image.png)
+
 ### ✨ Key Features
 - 📊 **Statistical Dashboard**: Comprehensive student data overview with interactive charts
 - 🔍 **Advanced Search**: Precise search by student ID, name, class, birth date
