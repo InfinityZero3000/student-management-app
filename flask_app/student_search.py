@@ -1,6 +1,7 @@
 """
-Data Processor for Advanced Student Search
-Handles student data processing, searching, and matching - EXACT MATCH ONLY
+Student Search Engine for HUIT Management System
+Advanced student search algorithms with exact matching
+Handles MSSV, name, class, and date-based searches
 """
 
 import pandas as pd

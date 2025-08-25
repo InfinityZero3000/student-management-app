@@ -1186,8 +1186,8 @@ def api_chart_score_histogram():
 # ================================
 
 # Import our custom modules
-from file_handler_new import intelligent_data_extraction, process_uploaded_files, validate_file, secure_filename
-from data_processor_new import advanced_student_search, identify_database_columns
+from file_processor import intelligent_data_extraction, process_uploaded_files, validate_file, secure_filename
+from student_search import advanced_student_search, identify_database_columns
 
 @app.route('/api/advanced-search', methods=['POST'])
 def api_advanced_search():

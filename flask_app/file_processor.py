@@ -1,6 +1,7 @@
 """
-File Handler for Student Management App
-Handles file upload, parsing, and text extraction
+File Processor for HUIT Student Management System
+Handles file upload, parsing, and intelligent data extraction
+Supports CSV, DOCX, XLSX, TXT formats with Vietnamese text processing
 """
 
 import os
