@@ -1,23 +1,23 @@
-# Hệ thống Quản lý Sinh viên HUIT
+# HUIT Student Management System
 
-## Giới thiệu
-Hệ thống web quản lý sinh viên hiện đại được xây dựng bằng **Flask** với giao diện trực quan và các tính năng mạnh mẽ:
+## Overview
+A modern web-based student management system built with **Flask**, featuring an intuitive interface and powerful functionality:
 
-### ✨ Tính năng chính
-- 📊 **Dashboard thống kê**: Tổng quan dữ liệu sinh viên với biểu đồ trực quan
-- 🔍 **Tìm kiếm nâng cao**: Tìm kiếm chính xác theo MSSV, tên, lớp, ngày sinh
-- 📁 **Import đa định dạng**: Hỗ trợ CSV, DOCX, XLSX, TXT
-- 📈 **Thống kê chi tiết**: Phân tích điểm số, xếp loại, tỷ lệ đỗ
-- 📋 **Quản lý dữ liệu**: Xem, so sánh và xuất báo cáo
-- 🎯 **Tìm kiếm thông minh**: Algoritm tìm kiếm với độ chính xác cao
+### ✨ Key Features
+- 📊 **Statistical Dashboard**: Comprehensive student data overview with interactive charts
+- 🔍 **Advanced Search**: Precise search by student ID, name, class, birth date
+- 📁 **Multi-format Import**: Support for CSV, DOCX, XLSX, TXT files
+- 📈 **Detailed Analytics**: Score analysis, grade distribution, pass rates
+- 📋 **Data Management**: View, compare, and export reports
+- 🎯 **Smart Search**: High-precision search algorithms
 
-## Yêu cầu hệ thống
-- **Python**: 3.8 trở lên
-- **RAM**: Tối thiểu 2GB (khuyến nghị 4GB)
-- **Dung lượng**: 500MB trống
-- **Trình duyệt**: Chrome, Firefox, Safari, Edge (phiên bản mới)
+## System Requirements
+- **Python**: 3.8 or higher
+- **RAM**: Minimum 2GB (4GB recommended)
+- **Storage**: 500MB free space
+- **Browser**: Chrome, Firefox, Safari, Edge (latest versions)
 
-## Cài đặt nhanh
+## Quick Setup
 
 ### 1. Clone repository
 ```bash
@@ -25,48 +25,49 @@ git clone https://github.com/InfinityZero3000/student-management-app.git
 cd student-management-app
 ```
 
-### 2. Tạo môi trường ảo (khuyến nghị)
+### 2. Create virtual environment (recommended)
 ```bash
 python -m venv .venv
 source .venv/bin/activate  # macOS/Linux
-# hoặc
+# or
 .venv\Scripts\activate     # Windows
 ```
 
-### 3. Cài đặt dependencies
+### 3. Install dependencies
 ```bash
 cd flask_app
 pip install -r requirements.txt
 ```
 
-### 4. Khởi chạy ứng dụng
+### 4. Launch application
 ```bash
 python server.py
 ```
 
-🌐 Truy cập: **http://127.0.0.1:5002**
+🌐 Access: **http://127.0.0.1:5002**
 
-## Cấu trúc dự án
+## Project Structure
 ```
 student-management-app/
-├── flask_app/                    # Ứng dụng Flask chính
-│   ├── server.py                # Server chính
-│   ├── data_processor_new.py    # Xử lý dữ liệu nâng cao
-│   ├── file_handler_new.py      # Xử lý file I/O
-│   ├── data_comparator.py       # So sánh dữ liệu
+├── flask_app/                    # Main Flask application
+│   ├── server.py                # Main server
+│   ├── student_search.py        # Advanced search engine
+│   ├── file_processor.py        # File I/O processing
+│   ├── data_comparator.py       # Data comparison
 │   ├── requirements.txt         # Dependencies
-│   ├── static/                  # Tài nguyên tĩnh
-│   │   ├── css/style.css       # Stylesheet chính
-│   │   └── js/dashboard.js     # JavaScript frontend
-│   └── templates/              # Template HTML
-│       ├── base.html           # Template cơ sở
-│       ├── dashboard.html      # Trang chủ dashboard
-│       ├── advanced_search.html # Tìm kiếm nâng cao
-│       ├── compare.html        # So sánh dữ liệu
-│       ├── data_management.html # Quản lý dữ liệu
-│       └── statistics.html     # Thống kê
-├── data/                       # Dữ liệu mẫu
-│   └── huit_point_student.csv  # File dữ liệu HUIT (3221 records)
-└── README.md                   # Tài liệu này
+│   ├── static/                  # Static resources
+│   │   ├── css/style.css       # Main stylesheet
+│   │   └── js/dashboard.js     # Frontend JavaScript
+│   └── templates/              # HTML templates
+│       ├── base.html           # Base template
+│       ├── dashboard.html      # Dashboard homepage
+│       ├── advanced_search.html # Advanced search
+│       ├── compare.html        # Data comparison
+│       ├── data_management.html # Data management
+│       └── statistics.html     # Statistics
+├── data/                       # Sample data
+│   └── huit_point_student.csv  # HUIT data file (3221 records)
+├── .gitignore                  # Git ignore rules
+└── README.md                   # This documentation
 ```
 
