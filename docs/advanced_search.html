@@ -1,0 +1,1247 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tìm kiếm nâng cao - HUIT Student Management</title>
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+    
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="static/css/style.css">
+    
+    
+</head>
+<body>
+    <!-- Main Container -->
+    <div class="app-container">
+        <!-- Sidebar -->
+        <nav class="sidebar">
+            <!-- Header -->
+            <div class="sidebar-header">
+                <div class="sidebar-brand">
+                    <span style="font-size: 20px;"> HUIT Academic <br>Grade Analysis</span>
+                </div>
+            </div>
+            
+
+            <!-- Navigation Menu -->
+            <ul class="nav-menu">
+                <li class="nav-item">
+                    <a href="index.html" class="nav-link ">
+                        <i data-lucide="home" class="nav-icon"></i>
+                        <span>Dashboard</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="statistics.html" class="nav-link ">
+                        <i data-lucide="bar-chart-3" class="nav-icon"></i>
+                        <span>Thống kê chi tiết</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="students.html" class="nav-link ">
+                        <i data-lucide="users" class="nav-icon"></i>
+                        <span>Danh sách sinh viên</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="/search" class="nav-link ">
+                        <i data-lucide="search" class="nav-icon"></i>
+                        <span>Tìm kiếm cơ bản</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="advanced_search.html" class="nav-link ">
+                        <i data-lucide="zap" class="nav-icon"></i>
+                        <span>Tìm kiếm nâng cao</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="compare.html" class="nav-link ">
+                        <i data-lucide="git-compare" class="nav-icon"></i>
+                        <span>So sánh dữ liệu</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="/alerts" class="nav-link ">
+                        <i data-lucide="alert-triangle" class="nav-icon"></i>
+                        <span>Cảnh báo học vụ</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="/reports" class="nav-link ">
+                        <i data-lucide="file-text" class="nav-icon"></i>
+                        <span>Báo cáo & Xuất file</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="data_management.html" class="nav-link ">
+                        <i data-lucide="database" class="nav-icon"></i>
+                        <span>Quản lý dữ liệu</span>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+        
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Top Navigation -->
+            <header class="top-nav">
+                <div class="nav-left">
+                    <h1 class="page-title">Tìm kiếm nâng cao</h1>
+                </div>
+                <div class="nav-right">
+                    <div class="search-box">
+                        <i data-lucide="search" class="search-icon"></i>
+                        <input type="text" placeholder="Tìm kiếm..." id="globalSearch">
+                    </div>
+                    <div class="user-info">
+                        <div class="date-time">
+                            <div class="date" id="currentDate"></div>
+                            <div class="time" id="currentTime"></div>
+                        </div>
+                        <div class="user-avatar">
+                            <i data-lucide="user" class="avatar-icon"></i>
+                        </div>
+                    </div>
+                </div>
+            </header>
+            
+            <!-- Page Content -->
+            <div class="content-wrapper">
+                
+                    
+                
+                
+                
+<div class="advanced-search-container">
+    <!-- Search Input Section -->
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title">
+                <i data-lucide="search"></i>
+                Tìm kiếm dữ liệu sinh viên
+            </h3>
+        </div>
+        <div class="card-body">
+            <form id="advancedSearchForm">
+                <!-- Text Input Area -->
+                <div class="input-group">
+                    <label for="searchInput">
+                        <i data-lucide="edit-3"></i>
+                        Nhập dữ liệu từ bàn phím
+                    </label>
+                    <textarea 
+                        id="searchInput" 
+                        name="search_input" 
+                        placeholder="Nhập danh sách sinh viên..."
+                        rows="7"
+                    ></textarea>
+                    <small class="input-help">
+                        <i data-lucide="info"></i>
+                        Có thể nhập: MSSV, tên đầy đủ, tên một phần, lớp, ngày sinh. Mỗi dòng một thông tin hoặc một sinh viên.
+                    </small>
+                </div>
+
+                <!-- File Upload Section -->
+                <div class="input-group">
+                    <label for="fileInput">
+                        <i data-lucide="upload"></i>
+                        Hoặc tải lên file dữ liệu
+                    </label>
+                    <div class="file-upload-area" id="fileUploadArea">
+                        <input type="file" id="fileInput" name="files" multiple accept=".csv,.docx,.xlsx,.xls,.txt">
+                        <div class="file-upload-text">
+                            <i data-lucide="upload-cloud"></i>
+                            <p>Kéo thả file vào đây hoặc click để chọn</p>
+                            <small>Hỗ trợ: CSV, DOCX, XLSX, TXT (tối đa 16MB mỗi file)</small>
+                        </div>
+                    </div>
+                    <div id="fileList" class="file-list"></div>
+                </div>
+
+                <!-- Search Options -->
+                <!-- Search Message -->
+                <div class="search-message">
+                    <div class="message-content">
+                        <i data-lucide="info"></i>
+                        <p>Hệ thống sẽ tìm kiếm chính xác sinh viên dựa trên MSSV, họ tên, lớp hoặc ngày sinh</p>
+                    </div>
+                </div>                <!-- Action Buttons -->
+                <div class="action-group">
+                    <button type="submit" class="btn-search">
+                        <i data-lucide="search"></i>
+                        Tìm kiếm thông tin
+                    </button>
+                    <button type="button" class="btn-clear" onclick="clearSearchForm()">
+                        <i data-lucide="refresh-cw"></i>
+                        Xóa và nhập lại
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Loading Indicator -->
+    <div id="loadingIndicator" class="loading" style="display: none;">
+        <div class="loading-spinner"></div>
+        <p>Đang phân tích và tìm kiếm dữ liệu...</p>
+    </div>
+
+    <!-- Search Results -->
+    <div id="resultsSection" class="results-section" style="display: none;">
+        <!-- Summary Card -->
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">
+                    <i data-lucide="bar-chart-3"></i>
+                    Tóm tắt kết quả
+                </h3>
+            </div>
+            <div class="card-body">
+                <div class="summary-stats">
+                    <div class="stat-item">
+                        <div class="stat-value" id="totalInputCount">0</div>
+                        <div class="stat-label">Dữ liệu đầu vào</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="totalFoundCount">0</div>
+                        <div class="stat-label">Tìm thấy</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="notFoundCount">0</div>
+                        <div class="stat-label">Không tìm thấy</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Results Table -->
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">
+                    <i data-lucide="users"></i>
+                    Kết quả tìm kiếm
+                </h3>
+                <div class="card-actions">
+                    <button class="btn-export" onclick="exportResults()">
+                        <i data-lucide="download"></i>
+                        Xuất kết quả
+                    </button>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="table-container">
+                    <table id="resultsTable" class="results-table">
+                        <thead>
+                            <tr>
+                                <th>STT</th>
+                                <th>Dữ liệu đầu vào</th>
+                                <th>MSSV</th>
+                                <th>Họ và tên</th>
+                                <th>Lớp</th>
+                                <th>Điểm</th>
+                                <th>Xếp loại</th>
+                                <th>Thao tác</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Results will be populated here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Student Detail Modal -->
+    <div id="studentModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">Thông tin sinh viên</h3>
+                <button class="modal-close" onclick="closeStudentModal()">
+                    <i data-lucide="x"></i>
+                </button>
+            </div>
+            <div class="modal-body" id="modalBody">
+                <!-- Student details will be populated here -->
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.advanced-search-container {
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+.card-subtitle {
+    color: #64748b;
+    font-size: 0.875rem;
+    margin: 0.5rem 0 0 0;
+    font-weight: normal;
+}
+
+.input-group {
+    margin-bottom: 1.5rem;
+}
+
+.input-group label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-weight: 600;
+    margin-bottom: 0.75rem;
+    color: #334155;
+    font-size: 0.875rem;
+}
+
+.input-group textarea {
+    width: 100%;
+    padding: 1rem;
+    border: 2px solid #e2e8f0;
+    border-radius: 8px;
+    font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+    font-size: 14px;
+    line-height: 1.5;
+    resize: vertical;
+    transition: all 0.3s ease;
+    background: #f8fafc;
+}
+
+.input-group textarea:focus {
+    outline: none;
+    border-color: #00A9FF;
+    background: white;
+    box-shadow: 0 0 0 3px rgba(0, 169, 255, 0.1);
+}
+
+.input-help {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+    font-size: 0.75rem;
+    color: #64748b;
+    line-height: 1.4;
+}
+
+.search-message {
+    background: linear-gradient(135deg, #e0f2fe 0%, #f0f9ff 100%);
+    border: 1px solid #0ea5e9;
+    border-radius: 8px;
+    padding: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.message-content {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    color: #0369a1;
+}
+
+.message-content i {
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
+}
+
+.message-content p {
+    margin: 0;
+    font-size: 0.875rem;
+    font-weight: 500;
+}
+
+.file-upload-area {
+    border: 2px dashed #e2e8f0;
+    border-radius: 8px;
+    padding: 2rem;
+    text-align: center;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    position: relative;
+    background: #f8fafc;
+    margin-top: 0.5rem;
+}
+
+.file-upload-area:hover {
+    border-color: #00A9FF;
+    background: #eff6ff;
+}
+
+.file-upload-area.drag-over {
+    border-color: #00A9FF;
+    background: #eff6ff;
+    transform: scale(1.02);
+}
+
+.file-upload-area input[type="file"] {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    cursor: pointer;
+}
+
+.file-upload-text {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.75rem;
+    color: #64748b;
+}
+
+.file-upload-text i {
+    width: 48px;
+    height: 48px;
+    color: #00A9FF;
+}
+
+.file-upload-text p {
+    margin: 0;
+    font-weight: 500;
+    color: #374151;
+}
+
+.file-upload-text small {
+    font-size: 0.75rem;
+    color: #64748b;
+}
+
+.action-group {
+    display: flex;
+    gap: 1rem;
+    justify-content: flex-start;
+}
+
+.btn-search {
+    background: linear-gradient(135deg, #00A9FF 0%, #0088CC 100%);
+    color: white;
+    border: none;
+    padding: 1rem 2rem;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.875rem;
+}
+
+.btn-search:hover:not(:disabled) {
+    background: linear-gradient(135deg, #0088CC 0%, #0066CC 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0, 169, 255, 0.3);
+}
+
+.btn-search:disabled {
+    background: #9ca3af;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+
+.btn-clear {
+    background: #f1f5f9;
+    color: #475569;
+    border: 1px solid #e2e8f0;
+    padding: 1rem 2rem;
+    border-radius: 8px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.875rem;
+}
+
+.btn-clear:hover {
+    background: #e2e8f0;
+    color: #334155;
+    border-color: #cbd5e1;
+}
+
+.results-section {
+    margin-top: 2rem;
+}
+
+.summary-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 1.5rem;
+    justify-content: center;
+}
+
+.stat-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 1rem;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.stat-value {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #00A9FF;
+}
+
+.stat-label {
+    font-size: 0.75rem;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    text-align: center;
+}
+
+.card-actions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.btn-export {
+    background: #10b981;
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    font-size: 0.875rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: all 0.2s ease;
+}
+
+.btn-export:hover {
+    background: #059669;
+    transform: translateY(-1px);
+}
+
+.table-container {
+    overflow-x: auto;
+    background: white;
+    border-radius: 8px;
+    border: 1px solid #e2e8f0;
+}
+
+.results-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.875rem;
+}
+
+.results-table th {
+    background: #f8fafc;
+    padding: 1rem 0.75rem;
+    text-align: left;
+    font-weight: 600;
+    color: #374151;
+    border-bottom: 2px solid #e2e8f0;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+
+.results-table td {
+    padding: 0.75rem;
+    border-bottom: 1px solid #f1f5f9;
+    vertical-align: middle;
+}
+
+.results-table tbody tr:hover {
+    background: #f8fafc;
+}
+
+.match-score {
+    display: inline-block;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-align: center;
+    min-width: 50px;
+}
+
+.match-exact {
+    background: #dcfce7;
+    color: #166534;
+}
+
+.match-high {
+    background: #fef3c7;
+    color: #92400e;
+}
+
+.match-medium {
+    background: #fecaca;
+    color: #991b1b;
+}
+
+.btn-detail {
+    background: #6366f1;
+    color: white;
+    border: none;
+    padding: 0.375rem 0.75rem;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.btn-detail:hover {
+    background: #4f46e5;
+    transform: translateY(-1px);
+}
+
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+
+.modal-content {
+    background: white;
+    border-radius: 12px;
+    width: 90%;
+    max-width: 600px;
+    max-height: 80vh;
+    overflow: hidden;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.5rem;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.modal-title {
+    margin: 0;
+    color: #374151;
+    font-size: 1.25rem;
+}
+
+.modal-close {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0.5rem;
+    color: #6b7280;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+}
+
+.modal-close:hover {
+    background: #f3f4f6;
+    color: #374151;
+}
+
+.modal-body {
+    padding: 1.5rem;
+    max-height: 60vh;
+    overflow-y: auto;
+}
+
+.student-detail-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+}
+
+.detail-item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.detail-label {
+    font-size: 0.75rem;
+    color: #6b7280;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-weight: 600;
+}
+
+.detail-value {
+    font-size: 0.875rem;
+    color: #374151;
+    font-weight: 500;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .advanced-search-container {
+        padding: 1rem;
+    }
+    
+    .search-options {
+        gap: 0.75rem;
+    }
+    
+    .action-group {
+        flex-direction: column;
+    }
+    
+    .btn-search,
+    .btn-clear {
+        width: 100%;
+        justify-content: center;
+    }
+    
+    .summary-stats {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .results-table {
+        font-size: 0.75rem;
+    }
+    
+    .results-table th,
+    .results-table td {
+        padding: 0.5rem 0.375rem;
+    }
+}
+</style>
+
+<script>
+class AdvancedSearchManager {
+    constructor() {
+        this.selectedFiles = [];
+        this.searchResults = [];
+        this.initializeEventListeners();
+    }
+
+    initializeEventListeners() {
+        // Form submission
+        document.getElementById('advancedSearchForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            this.performAdvancedSearch();
+        });
+
+        // Ctrl+Enter in textarea
+        document.getElementById('searchInput').addEventListener('keydown', (e) => {
+            if (e.ctrlKey && e.key === 'Enter') {
+                e.preventDefault();
+                this.performAdvancedSearch();
+            }
+        });
+
+        // File upload handling
+        const fileInput = document.getElementById('fileInput');
+        const fileUploadArea = document.getElementById('fileUploadArea');
+
+        fileInput.addEventListener('change', (e) => {
+            this.handleFileSelection(e.target.files);
+        });
+
+        // Drag and drop
+        fileUploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            fileUploadArea.classList.add('drag-over');
+        });
+
+        fileUploadArea.addEventListener('dragleave', (e) => {
+            e.preventDefault();
+            fileUploadArea.classList.remove('drag-over');
+        });
+
+        fileUploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            fileUploadArea.classList.remove('drag-over');
+            this.handleFileSelection(e.dataTransfer.files);
+        });
+    }
+
+    handleFileSelection(files) {
+        for (let file of files) {
+            if (file.size > 16 * 1024 * 1024) {
+                alert(`File "${file.name}" quá lớn. Kích thước tối đa là 16MB.`);
+                continue;
+            }
+            
+            const allowedTypes = ['.csv', '.docx', '.xlsx', '.xls', '.txt'];
+            const fileExt = '.' + file.name.split('.').pop().toLowerCase();
+            if (!allowedTypes.includes(fileExt)) {
+                alert(`File "${file.name}" không được hỗ trợ. Chỉ hỗ trợ: CSV, DOCX, XLSX, TXT`);
+                continue;
+            }
+            
+            if (!this.selectedFiles.find(f => f.name === file.name)) {
+                this.selectedFiles.push(file);
+            }
+        }
+        this.updateFileList();
+    }
+
+    updateFileList() {
+        const fileList = document.getElementById('fileList');
+        
+        if (this.selectedFiles.length === 0) {
+            fileList.innerHTML = '';
+            return;
+        }
+
+        fileList.innerHTML = this.selectedFiles.map((file, index) => `
+            <div class="file-item">
+                <div class="file-info">
+                    <i data-lucide="file-text" class="file-icon"></i>
+                    <span class="file-name">${file.name}</span>
+                    <span class="file-size">(${this.formatFileSize(file.size)})</span>
+                </div>
+                <button type="button" class="file-remove" onclick="advancedSearchManager.removeFile(${index})">
+                    <i data-lucide="x"></i>
+                </button>
+            </div>
+        `).join('');
+
+        // Reinitialize Lucide icons
+        if (typeof lucide !== 'undefined') {
+            lucide.createIcons();
+        }
+    }
+
+    removeFile(index) {
+        this.selectedFiles.splice(index, 1);
+        this.updateFileList();
+    }
+
+    formatFileSize(bytes) {
+        if (bytes === 0) return '0 Bytes';
+        const k = 1024;
+        const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+        return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    }
+
+    async performAdvancedSearch() {
+        const searchInput = document.getElementById('searchInput').value.trim();
+        
+        if (!searchInput && this.selectedFiles.length === 0) {
+            alert('Vui lòng nhập dữ liệu tìm kiếm hoặc tải lên file');
+            return;
+        }
+
+        const loadingIndicator = document.getElementById('loadingIndicator');
+        const resultsSection = document.getElementById('resultsSection');
+        
+        loadingIndicator.style.display = 'block';
+        resultsSection.style.display = 'none';
+
+        try {
+            let response;
+            
+            if (this.selectedFiles.length > 0) {
+                // Use file upload endpoint
+                const formData = new FormData();
+                
+                if (searchInput.trim()) {
+                    formData.append('text_input', searchInput);
+                }
+                
+                for (let file of this.selectedFiles) {
+                    formData.append('files', file);
+                }
+
+                response = await fetch('/api/advanced-search/upload', {
+                    method: 'POST',
+                    body: formData
+                });
+            } else {
+                // Use text search endpoint
+                response = await fetch('/api/advanced-search', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ 
+                        query: searchInput
+                    })
+                });
+            }
+
+            const result = await response.json();
+
+            if (result.success) {
+                this.searchResults = result.matches || [];
+                this.displayResults(result);
+            } else {
+                throw new Error(result.error || 'Có lỗi xảy ra khi tìm kiếm');
+            }
+
+        } catch (error) {
+            console.error('Error:', error);
+            alert('Có lỗi xảy ra: ' + error.message);
+        } finally {
+            loadingIndicator.style.display = 'none';
+        }
+    }
+
+    displayResults(result) {
+        const resultsSection = document.getElementById('resultsSection');
+        const totalInputCount = result.total_input_items || 0;
+        const totalFoundCount = result.matches ? result.matches.length : 0;
+        const notFoundCount = totalInputCount - totalFoundCount;
+
+        // Update summary
+        document.getElementById('totalInputCount').textContent = totalInputCount;
+        document.getElementById('totalFoundCount').textContent = totalFoundCount;
+        document.getElementById('notFoundCount').textContent = notFoundCount;
+
+        // Update results table
+        this.populateResultsTable(result.matches || []);
+        
+        resultsSection.style.display = 'block';
+        resultsSection.scrollIntoView({ behavior: 'smooth' });
+    }
+
+    populateResultsTable(matches) {
+        const tbody = document.querySelector('#resultsTable tbody');
+        tbody.innerHTML = '';
+
+        matches.forEach((match, index) => {
+            const row = document.createElement('tr');
+
+            // Get MSSV - try multiple field names
+            const mssv = this.getValue(match, 'mã sinh viên') || 
+                        this.getValue(match, 'Mã sinh viên') || 
+                        this.getValue(match, 'mssv') || 
+                        this.getValue(match, 'id') || '';
+
+            // Get class - try multiple field names  
+            const lop = this.getValue(match, 'lớp') || 
+                       this.getValue(match, 'Lớp') ||
+                       this.getValue(match, 'class') || '';
+
+            // Get rank - try multiple field names
+            const xepLoai = this.getValue(match, 'xếp loại') || 
+                           this.getValue(match, 'Xếp loại') ||
+                           this.getValue(match, 'rank') || '';
+
+            row.innerHTML = `
+                <td>${index + 1}</td>
+                <td title="${match.input_value || ''}">${(match.input_value || '').substring(0, 20)}${(match.input_value || '').length > 20 ? '...' : ''}</td>
+                <td>${mssv}</td>
+                <td>${this.getFullName(match)}</td>
+                <td>${lop}</td>
+                <td>${this.getScore(match)}</td>
+                <td>${xepLoai}</td>
+                <td>
+                    <button class="btn-detail" onclick="advancedSearchManager.showStudentDetail(${index})">
+                        <i data-lucide="eye"></i> Xem
+                    </button>
+                </td>
+            `;
+            
+            tbody.appendChild(row);
+        });
+
+        // Reinitialize Lucide icons
+        if (typeof lucide !== 'undefined') {
+            lucide.createIcons();
+        }
+    }
+
+    getValue(match, keyPattern) {
+        // First try exact match (case-insensitive)
+        for (const [key, value] of Object.entries(match)) {
+            if (key.toLowerCase() === keyPattern.toLowerCase()) {
+                return value && value.toString().trim() !== 'nan' && value.toString().trim() !== '' ? value : '';
+            }
+        }
+        
+        // Then try pattern matching
+        for (const [key, value] of Object.entries(match)) {
+            if (key.toLowerCase().includes(keyPattern.toLowerCase())) {
+                return value && value.toString().trim() !== 'nan' && value.toString().trim() !== '' ? value : '';
+            }
+        }
+        
+        // Handle Vietnamese specific mappings
+        const vietnameseMapping = {
+            'mssv': ['mã sinh viên', 'ma sinh vien'],
+            'lớp': ['lop', 'class'],
+            'điểm': ['diem', 'score'],
+            'tên': ['ten', 'name'],
+            'họ và tên': ['ho va ten', 'fullname'],
+            'xếp loại': ['xep loai', 'rank', 'classification']
+        };
+        
+        const mappings = vietnameseMapping[keyPattern.toLowerCase()] || [];
+        for (const mapping of mappings) {
+            for (const [key, value] of Object.entries(match)) {
+                if (key.toLowerCase().includes(mapping)) {
+                    return value && value.toString().trim() !== 'nan' && value.toString().trim() !== '' ? value : '';
+                }
+            }
+        }
+        
+        return '';
+    }
+
+    getFullName(match) {
+        // Try to get full name from various sources
+        let fullName = this.getValue(match, 'họ và tên') || this.getValue(match, 'fullname') || this.getValue(match, 'name');
+        if (fullName) return fullName;
+        
+        // Try to combine first and last name from Vietnamese fields
+        const ho_dem = this.getValue(match, 'họ đệm') || this.getValue(match, 'ho dem');
+        const ten = this.getValue(match, 'tên') || this.getValue(match, 'ten');
+        
+        if (ho_dem && ten) {
+            return `${ho_dem} ${ten}`.trim();
+        }
+        
+        return ho_dem || ten || this.getValue(match, 'Tên') || this.getValue(match, 'Họ đệm') || '';
+    }
+
+    getScore(match) {
+        // Find score from various columns, prioritize exact match first
+        const score10 = this.getValue(match, 'điểm 10') || this.getValue(match, 'Điểm 10');
+        const score4 = this.getValue(match, 'điểm 4') || this.getValue(match, 'Điểm 4');
+        const score = this.getValue(match, 'điểm') || this.getValue(match, 'Điểm');
+        
+        return score10 || score4 || score || '';
+    }
+
+    showStudentDetail(index) {
+        if (index >= 0 && index < this.searchResults.length) {
+            const student = this.searchResults[index];
+            this.displayStudentModal(student);
+        }
+    }
+
+    displayStudentModal(student) {
+        const modalBody = document.getElementById('modalBody');
+        
+        // Create detailed view of student information
+        const details = [];
+        
+        // Important fields to show
+        const importantFields = [
+            { key: 'mssv', label: 'Mã sinh viên' },
+            { key: 'họ đệm', label: 'Họ đệm' },
+            { key: 'tên', label: 'Tên' },
+            { key: 'giới tính', label: 'Giới tính' },
+            { key: 'ngày sinh', label: 'Ngày sinh' },
+            { key: 'lớp', label: 'Lớp' },
+            { key: 'điểm 10', label: 'Điểm hệ 10' },
+            { key: 'điểm 4', label: 'Điểm hệ 4' },
+            { key: 'điểm chữ', label: 'Điểm chữ' },
+            { key: 'xếp loại', label: 'Xếp loại' },
+            { key: 'năm thứ', label: 'Năm thứ' },
+            { key: 'số tc tích lũy', label: 'Số TC tích lũy' },
+            { key: 'ghi chú', label: 'Ghi chú' }
+        ];
+
+        importantFields.forEach(field => {
+            const value = this.getValue(student, field.key);
+            if (value && value.toString().trim() !== '') {
+                details.push({ label: field.label, value: value });
+            }
+        });
+
+        // Add any remaining fields not covered above
+        Object.entries(student).forEach(([key, value]) => {
+            if (!key.includes('match') && 
+                !importantFields.some(f => key.toLowerCase().includes(f.key)) &&
+                value && value.toString().trim() !== '' && value.toString().trim() !== 'nan') {
+                details.push({ label: key, value: value });
+            }
+        });
+
+        modalBody.innerHTML = `
+            <div class="student-detail-grid">
+                ${details.map(detail => `
+                    <div class="detail-item">
+                        <div class="detail-label">${detail.label}</div>
+                        <div class="detail-value">${detail.value}</div>
+                    </div>
+                `).join('')}
+            </div>
+        `;
+
+        document.getElementById('studentModal').style.display = 'flex';
+    }
+
+    clearForm() {
+        document.getElementById('searchInput').value = '';
+        this.selectedFiles = [];
+        this.updateFileList();
+        
+        // Reset file input
+        const fileInput = document.getElementById('fileInput');
+        fileInput.value = '';
+        
+        // Hide results
+        document.getElementById('resultsSection').style.display = 'none';
+    }
+}
+
+// Initialize when page loads
+let advancedSearchManager;
+document.addEventListener('DOMContentLoaded', () => {
+    advancedSearchManager = new AdvancedSearchManager();
+});
+
+// Global functions
+function clearSearchForm() {
+    advancedSearchManager.clearForm();
+}
+
+function closeStudentModal() {
+    document.getElementById('studentModal').style.display = 'none';
+}
+
+function exportResults() {
+    if (!advancedSearchManager.searchResults.length) {
+        alert('Không có dữ liệu để xuất');
+        return;
+    }
+    
+    // Simple CSV export
+    const headers = ['STT', 'Dữ liệu đầu vào', 'Độ khớp', 'MSSV', 'Họ và tên', 'Lớp', 'Điểm', 'Xếp loại'];
+    const rows = [headers];
+    
+    advancedSearchManager.searchResults.forEach((match, index) => {
+        rows.push([
+            index + 1,
+            match.input_value || '',
+            Math.round((match.match_score || 0) * 100) + '%',
+            advancedSearchManager.getValue(match, 'mssv') || advancedSearchManager.getValue(match, 'id') || '',
+            advancedSearchManager.getFullName(match),
+            advancedSearchManager.getValue(match, 'lớp') || advancedSearchManager.getValue(match, 'class') || '',
+            advancedSearchManager.getScore(match),
+            advancedSearchManager.getValue(match, 'xếp loại') || advancedSearchManager.getValue(match, 'rank') || ''
+        ]);
+    });
+    
+    const csvContent = rows.map(row => row.map(field => `"${field}"`).join(',')).join('\n');
+    const blob = new Blob(['\ufeff' + csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = `ket_qua_tim_kiem_${new Date().toISOString().slice(0, 10)}.csv`;
+    link.click();
+}
+
+// Close modal when clicking outside
+document.addEventListener('click', (e) => {
+    const modal = document.getElementById('studentModal');
+    if (e.target === modal) {
+        closeStudentModal();
+    }
+});
+</script>
+
+            </div>
+        </main>
+    </div>
+    
+    <!-- Loading Overlay -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-spinner">
+            <div class="spinner"></div>
+            <div class="loading-text">Đang tải...</div>
+        </div>
+    </div>
+    
+    <!-- Scripts -->
+    <script src="static/js/dashboard.js"></script>
+    
+    
+    <script>
+        // Initialize Lucide icons
+        lucide.createIcons();
+        
+        // Update date/time
+        function updateDateTime() {
+            const now = new Date();
+            document.getElementById('currentDate').textContent = now.toLocaleDateString('vi-VN');
+            document.getElementById('currentTime').textContent = now.toLocaleTimeString('vi-VN', {hour: '2-digit', minute: '2-digit'});
+        }
+        
+        updateDateTime();
+        setInterval(updateDateTime, 60000); // Update every minute
+        
+        // Load data info
+        async function loadDataInfo() {
+            try {
+                const response = await fetch('/api/dashboard-data');
+                if (response.ok) {
+                    const data = await response.json();
+                    const statsEl = document.getElementById('dataStats');
+                    statsEl.innerHTML = `
+                        <div>Sinh viên: ${data.total_students || 0}</div>
+                        <div>Lớp: ${data.total_classes || 0}</div>
+                        <div>Điểm TB: ${data.average_score || 0}</div>
+                        <div>Tỷ lệ đậu: ${data.pass_rate || 0}%</div>
+                        <div>Cập nhật: ${data.recent_updates || 'N/A'}</div>
+                    `;
+                }
+            } catch (error) {
+                console.error('Error loading data info:', error);
+            }
+        }
+        
+        // Load data info on page load
+        document.addEventListener('DOMContentLoaded', loadDataInfo);
+    </script>
+
+    <script>
+        // Static mode notice
+        if (typeof window !== 'undefined') {
+            console.log('Running in static mode - API endpoints disabled');
+            
+            // Disable form submissions
+            document.addEventListener('DOMContentLoaded', function() {
+                const forms = document.querySelectorAll('form');
+                forms.forEach(form => {
+                    form.addEventListener('submit', function(e) {
+                        e.preventDefault();
+                        alert('This is a static demo. Form submission is disabled.');
+                    });
+                });
+                
+                // Add static mode banner
+                const banner = document.createElement('div');
+                banner.innerHTML = `
+                    <div style="background: #ff9800; color: white; padding: 10px; text-align: center; position: fixed; top: 0; left: 0; right: 0; z-index: 9999;">
+                        📌 Static Demo Mode - Some features are disabled. 
+                        <a href="https://github.com/InfinityZero3000/student-management-app" style="color: white; text-decoration: underline;">View Full Version</a>
+                    </div>
+                `;
+                document.body.insertBefore(banner, document.body.firstChild);
+                
+                // Adjust body padding to account for banner
+                document.body.style.paddingTop = '50px';
+            });
+        }
+    </script>
+</body>
+</html>

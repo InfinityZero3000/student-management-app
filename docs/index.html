@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HUIT Student Management</title>
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+    
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="static/css/style.css">
+    
+    
+</head>
+<body>
+    <!-- Main Container -->
+    <div class="app-container">
+        <!-- Sidebar -->
+        <nav class="sidebar">
+            <!-- Header -->
+            <div class="sidebar-header">
+                <div class="sidebar-brand">
+                    <span style="font-size: 20px;"> HUIT Academic <br>Grade Analysis</span>
+                </div>
+            </div>
+            
+
+            <!-- Navigation Menu -->
+            <ul class="nav-menu">
+                <li class="nav-item">
+                    <a href="index.html" class="nav-link ">
+                        <i data-lucide="home" class="nav-icon"></i>
+                        <span>Dashboard</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="statistics.html" class="nav-link ">
+                        <i data-lucide="bar-chart-3" class="nav-icon"></i>
+                        <span>Thống kê chi tiết</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="students.html" class="nav-link ">
+                        <i data-lucide="users" class="nav-icon"></i>
+                        <span>Danh sách sinh viên</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="/search" class="nav-link ">
+                        <i data-lucide="search" class="nav-icon"></i>
+                        <span>Tìm kiếm cơ bản</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="advanced_search.html" class="nav-link ">
+                        <i data-lucide="zap" class="nav-icon"></i>
+                        <span>Tìm kiếm nâng cao</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="compare.html" class="nav-link ">
+                        <i data-lucide="git-compare" class="nav-icon"></i>
+                        <span>So sánh dữ liệu</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="/alerts" class="nav-link ">
+                        <i data-lucide="alert-triangle" class="nav-icon"></i>
+                        <span>Cảnh báo học vụ</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="/reports" class="nav-link ">
+                        <i data-lucide="file-text" class="nav-icon"></i>
+                        <span>Báo cáo & Xuất file</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="data_management.html" class="nav-link ">
+                        <i data-lucide="database" class="nav-icon"></i>
+                        <span>Quản lý dữ liệu</span>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+        
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Top Navigation -->
+            <header class="top-nav">
+                <div class="nav-left">
+                    <h1 class="page-title">Dashboard</h1>
+                </div>
+                <div class="nav-right">
+                    <div class="search-box">
+                        <i data-lucide="search" class="search-icon"></i>
+                        <input type="text" placeholder="Tìm kiếm..." id="globalSearch">
+                    </div>
+                    <div class="user-info">
+                        <div class="date-time">
+                            <div class="date" id="currentDate"></div>
+                            <div class="time" id="currentTime"></div>
+                        </div>
+                        <div class="user-avatar">
+                            <i data-lucide="user" class="avatar-icon"></i>
+                        </div>
+                    </div>
+                </div>
+            </header>
+            
+            <!-- Page Content -->
+            <div class="content-wrapper">
+                
+                    
+                
+                
+                
+<!-- Overview Metrics -->
+<div class="grid grid-4" style="margin-bottom: 2rem;">
+    <div class="metric-card">
+        <div class="metric-icon blue">
+            <i data-lucide="users"></i>
+        </div>
+        <div class="metric-value" id="totalStudents">0</div>
+        <div class="metric-label">Tổng sinh viên</div>
+    </div>
+    
+    <div class="metric-card">
+        <div class="metric-icon green">
+            <i data-lucide="building"></i>
+        </div>
+        <div class="metric-value" id="totalClasses">0</div>
+        <div class="metric-label">Số lớp</div>
+    </div>
+    
+    <div class="metric-card">
+        <div class="metric-icon purple">
+            <i data-lucide="target"></i>
+        </div>
+        <div class="metric-value" id="averageScore">0.0</div>
+        <div class="metric-label">Điểm trung bình</div>
+    </div>
+    
+    <div class="metric-card">
+        <div class="metric-icon orange">
+            <i data-lucide="check-circle"></i>
+        </div>
+        <div class="metric-value" id="passRate">0.0%</div>
+        <div class="metric-label">Tỷ lệ đậu</div>
+    </div>
+</div>
+
+
+<!-- No Data State -->
+<div class="card" style="text-align: center; padding: 4rem 2rem;">
+    <div style="margin-bottom: 2rem;">
+        <i data-lucide="database" style="width: 64px; height: 64px; color: #64748b;"></i>
+    </div>
+    <h3 style="color: #64748b; margin-bottom: 1rem;">Chưa có dữ liệu</h3>
+    <p style="color: #94a3b8; margin-bottom: 2rem;">
+        Vui lòng tải lên file dữ liệu để bắt đầu sử dụng dashboard
+    </p>
+    <a href="data_management.html" class="btn btn-primary">
+        <i data-lucide="upload"></i>
+        Tải lên dữ liệu
+    </a>
+</div>
+
+
+            </div>
+        </main>
+    </div>
+    
+    <!-- Loading Overlay -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-spinner">
+            <div class="spinner"></div>
+            <div class="loading-text">Đang tải...</div>
+        </div>
+    </div>
+    
+    <!-- Scripts -->
+    <script src="static/js/dashboard.js"></script>
+    
+<style>
+.activity-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.activity-item {
+    display: flex;
+    align-items: center;
+    padding: 1rem;
+    background: #f8fafc;
+    border-radius: 8px;
+    border-left: 4px solid #3b82f6;
+}
+
+.activity-icon {
+    width: 40px;
+    height: 40px;
+    background: #3b82f6;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    margin-right: 1rem;
+}
+
+.activity-icon i {
+    width: 18px;
+    height: 18px;
+}
+
+.activity-content {
+    flex: 1;
+}
+
+.activity-title {
+    font-weight: 500;
+    color: #334155;
+    margin-bottom: 0.25rem;
+}
+
+.activity-time {
+    font-size: 0.875rem;
+    color: #64748b;
+}
+</style>
+
+<script>
+// Load and update dashboard data dynamically
+async function loadDashboardData() {
+    try {
+        const response = await fetch('/api/dashboard-data');
+        if (response.ok) {
+            const data = await response.json();
+            
+            // Update metric cards
+            document.getElementById('totalStudents').textContent = data.total_students || 0;
+            document.getElementById('totalClasses').textContent = data.total_classes || 0;
+            document.getElementById('averageScore').textContent = (data.average_score || 0).toFixed(1);
+            document.getElementById('passRate').textContent = (data.pass_rate || 0).toFixed(1) + '%';
+            
+            console.log('Dashboard data updated from database:', data);
+        } else {
+            console.error('Failed to fetch dashboard data');
+        }
+    } catch (error) {
+        console.error('Error loading dashboard data:', error);
+    }
+}
+
+// Load data on page load
+document.addEventListener('DOMContentLoaded', function() {
+    loadDashboardData();
+    
+    // Update every 30 seconds for real-time data
+    setInterval(loadDashboardData, 30000);
+});
+</script>
+
+    
+    <script>
+        // Initialize Lucide icons
+        lucide.createIcons();
+        
+        // Update date/time
+        function updateDateTime() {
+            const now = new Date();
+            document.getElementById('currentDate').textContent = now.toLocaleDateString('vi-VN');
+            document.getElementById('currentTime').textContent = now.toLocaleTimeString('vi-VN', {hour: '2-digit', minute: '2-digit'});
+        }
+        
+        updateDateTime();
+        setInterval(updateDateTime, 60000); // Update every minute
+        
+        // Load data info
+        async function loadDataInfo() {
+            try {
+                const response = await fetch('/api/dashboard-data');
+                if (response.ok) {
+                    const data = await response.json();
+                    const statsEl = document.getElementById('dataStats');
+                    statsEl.innerHTML = `
+                        <div>Sinh viên: ${data.total_students || 0}</div>
+                        <div>Lớp: ${data.total_classes || 0}</div>
+                        <div>Điểm TB: ${data.average_score || 0}</div>
+                        <div>Tỷ lệ đậu: ${data.pass_rate || 0}%</div>
+                        <div>Cập nhật: ${data.recent_updates || 'N/A'}</div>
+                    `;
+                }
+            } catch (error) {
+                console.error('Error loading data info:', error);
+            }
+        }
+        
+        // Load data info on page load
+        document.addEventListener('DOMContentLoaded', loadDataInfo);
+    </script>
+
+    <script>
+        // Static mode notice
+        if (typeof window !== 'undefined') {
+            console.log('Running in static mode - API endpoints disabled');
+            
+            // Disable form submissions
+            document.addEventListener('DOMContentLoaded', function() {
+                const forms = document.querySelectorAll('form');
+                forms.forEach(form => {
+                    form.addEventListener('submit', function(e) {
+                        e.preventDefault();
+                        alert('This is a static demo. Form submission is disabled.');
+                    });
+                });
+                
+                // Add static mode banner
+                const banner = document.createElement('div');
+                banner.innerHTML = `
+                    <div style="background: #ff9800; color: white; padding: 10px; text-align: center; position: fixed; top: 0; left: 0; right: 0; z-index: 9999;">
+                        📌 Static Demo Mode - Some features are disabled. 
+                        <a href="https://github.com/InfinityZero3000/student-management-app" style="color: white; text-decoration: underline;">View Full Version</a>
+                    </div>
+                `;
+                document.body.insertBefore(banner, document.body.firstChild);
+                
+                // Adjust body padding to account for banner
+                document.body.style.paddingTop = '50px';
+            });
+        }
+    </script>
+</body>
+</html>
