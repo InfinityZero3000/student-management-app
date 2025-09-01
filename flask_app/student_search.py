@@ -194,61 +194,61 @@ def determine_input_type(input_text):
 
 def advanced_student_search(input_list, student_data):
     """
-    Advanced search function that finds exact matches only
-    Returns only students that exist in database
+    Thực hiện tìm kiếm nâng cao từ danh sách đầu vào - GIỮ THỨ TỰ INPUT
     """
     if student_data is None or student_data.empty:
         return []
-    
-    # Identify columns
+        
+    # Xác định cấu trúc cột
     db_columns = identify_database_columns(student_data)
-    logger.info(f"Database columns identified: {db_columns}")
     
-    all_matches = []
-    processed_inputs = set()
+    # Log thông tin
+    logger.info(f"Processing {len(input_list)} input items in order")
     
-    for input_item in input_list:
-        input_item = str(input_item).strip()
-        if not input_item or input_item in processed_inputs:
+    # Kết quả tìm kiếm theo thứ tự
+    ordered_results = []
+    
+    # Xử lý từng dòng đầu vào THEO THỨ TỰ
+    for input_index, input_text in enumerate(input_list):
+        if not input_text.strip():
             continue
+            
+        # Xác định loại đầu vào: MSSV, tên, lớp, ngày sinh
+        input_type = determine_input_type(input_text)
         
-        processed_inputs.add(input_item)
-        input_type = determine_input_type(input_item)
-        
-        logger.info(f"Processing '{input_item}' as type: {input_type}")
-        
+        # Tìm kiếm theo loại
         matches = []
-        
         if input_type == 'mssv':
-            matches = search_by_mssv(input_item, student_data, db_columns)
+            matches = search_by_mssv(input_text, student_data, db_columns)
         elif input_type == 'name':
-            matches = search_by_name(input_item, student_data, db_columns)
+            matches = search_by_name(input_text, student_data, db_columns)
         elif input_type == 'class':
-            matches = search_by_class(input_item, student_data, db_columns)
+            matches = search_by_class(input_text, student_data, db_columns)
         elif input_type == 'date':
-            matches = search_by_date(input_item, student_data, db_columns)
-        
-        # Only add if we found exact matches
-        if matches:
-            all_matches.extend(matches)
-            logger.info(f"Found {len(matches)} matches for '{input_item}'")
+            matches = search_by_date(input_text, student_data, db_columns)
         else:
-            logger.info(f"No matches found for '{input_item}'")
-    
-    # Remove duplicates based on MSSV
-    unique_matches = []
-    seen_mssv = set()
-    
-    for match in all_matches:
-        mssv_value = None
-        for mssv_col in db_columns.get('mssv', []):
-            if mssv_col in match:
-                mssv_value = str(match[mssv_col]).replace('.0', '').strip()
-                break
+            # Tìm theo tất cả các loại
+            matches.extend(search_by_mssv(input_text, student_data, db_columns))
+            if not matches:
+                matches.extend(search_by_name(input_text, student_data, db_columns))
+            if not matches:
+                matches.extend(search_by_class(input_text, student_data, db_columns))
+            if not matches:
+                matches.extend(search_by_date(input_text, student_data, db_columns))
         
-        if mssv_value and mssv_value not in seen_mssv:
-            seen_mssv.add(mssv_value)
-            unique_matches.append(match)
+        # Thêm thông tin về thứ tự và input vào kết quả
+        for match in matches:
+            if isinstance(match, dict):
+                match['input_value'] = input_text
+                match['input_order'] = input_index  # Thêm thứ tự input
+                match['match_score'] = 1.0  # Exact match score
+                
+        # Thêm vào kết quả theo thứ tự (chỉ lấy match đầu tiên nếu có nhiều)
+        if matches:
+            ordered_results.append(matches[0])  # Chỉ lấy kết quả tốt nhất
     
-    logger.info(f"Total unique matches found: {len(unique_matches)}")
-    return unique_matches
+    # Log kết quả
+    logger.info(f"Returning {len(ordered_results)} results in input order")
+    
+    # Trả về kết quả đã được sắp xếp theo thứ tự input
+    return ordered_results

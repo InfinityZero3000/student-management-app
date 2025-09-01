@@ -14,6 +14,8 @@ try:
     from datetime import datetime
     from pathlib import Path
     import logging
+    import re
+    import unicodedata
 except ImportError as e:
     print(f"Import error: {e}")
     print("Please install required packages:")
@@ -178,7 +180,7 @@ def advanced_search_students(query, search_type='all'):
         col_lower = col.lower()
         if any(keyword in col_lower for keyword in ['mssv', 'id', 'ma_sv', 'student_id', 'mã sinh viên']):
             mssv_cols.append(col)
-        elif any(keyword in col_lower for keyword in ['tên', 'name', 'ho_ten', 'fullname', 'họ và tên']):
+        elif any(keyword in col_lower for keyword in ['tên', 'name', 'ho_ten', 'fullname', 'họ và tên', 'họ đệm']):
             name_cols.append(col)
         elif any(keyword in col_lower for keyword in ['lớp', 'class', 'lop']):
             class_cols.append(col)
@@ -205,27 +207,46 @@ def advanced_search_students(query, search_type='all'):
         
         # Search by name
         if search_type in ['all', 'name']:
+            # Try to find full name by combining "Họ đệm" and "Tên" columns
+            full_name = ""
+            ho_dem = ""
+            ten = ""
+            
             for col in name_cols:
-                value = str(student[col]).strip().lower()
-                if value != 'nan' and value:
-                    # Exact match
-                    if query == value:
-                        match_score = max(match_score, 0.95)
-                        match_details.append(f"Tên khớp chính xác: {student[col]}")
-                    # Contains match
-                    elif query in value or value in query:
-                        match_score = max(match_score, 0.85)
-                        match_details.append(f"Tên chứa: {student[col]}")
-                    # Word-by-word match
-                    else:
-                        query_words = query.split()
-                        value_words = value.split()
-                        word_matches = sum(1 for qw in query_words if any(qw in vw for vw in value_words))
-                        if word_matches > 0:
-                            score = 0.7 * (word_matches / len(query_words))
-                            if score > 0.3:
-                                match_score = max(match_score, score)
-                                match_details.append(f"Tên khớp một phần: {student[col]}")
+                if 'họ đệm' in col.lower():
+                    ho_dem = str(student[col]).strip()
+                elif 'tên' in col.lower() and 'họ' not in col.lower():
+                    ten = str(student[col]).strip()
+            
+            if ho_dem and ten:
+                full_name = f"{ho_dem} {ten}".strip().lower()
+            else:
+                # Fallback to individual name columns
+                for col in name_cols:
+                    value = str(student[col]).strip().lower()
+                    if value != 'nan' and value:
+                        full_name = value
+                        break
+            
+            if full_name and full_name != 'nan':
+                # Exact match
+                if query == full_name:
+                    match_score = max(match_score, 0.95)
+                    match_details.append(f"Tên khớp chính xác: {full_name}")
+                # Contains match
+                elif query in full_name or full_name in query:
+                    match_score = max(match_score, 0.85)
+                    match_details.append(f"Tên chứa: {full_name}")
+                # Word-by-word match
+                else:
+                    query_words = query.split()
+                    name_words = full_name.split()
+                    word_matches = sum(1 for qw in query_words if any(qw in nw for nw in name_words))
+                    if word_matches > 0:
+                        score = 0.7 * (word_matches / len(query_words))
+                        if score > 0.3:
+                            match_score = max(match_score, score)
+                            match_details.append(f"Tên khớp một phần: {full_name}")
         
         # Search by class
         if search_type in ['all', 'class']:
@@ -255,8 +276,8 @@ def advanced_search_students(query, search_type='all'):
             
             matches.append(student_dict)
     
-    # Sort by match score (highest first)
-    matches.sort(key=lambda x: x['match_score'], reverse=True)
+    # Sort by original data order (student_index) instead of match score
+    matches.sort(key=lambda x: x['student_index'])
     
     # Return all matches (no limit)
     return matches
@@ -1239,7 +1260,7 @@ def api_advanced_search_upload():
             input_lines = [line.strip() for line in text_input.split('\n') if line.strip()]
             all_inputs.extend(input_lines)
         
-        # Process uploaded files (simplified)
+        # Process uploaded files (FIXED - avoid duplicates)
         if files:
             for file in files:
                 if file and file.filename:
@@ -1247,7 +1268,40 @@ def api_advanced_search_upload():
                         if file.filename.endswith('.csv'):
                             content = file.read().decode('utf-8')
                             lines = [line.strip() for line in content.split('\n') if line.strip()]
-                            all_inputs.extend(lines)
+                            
+                            # Xử lý CSV thông minh - kiểm tra xem có phải file có header không
+                            csv_data = []
+                            header_found = False
+                            
+                            for line in lines:
+                                if not line:
+                                    continue
+                                    
+                                # Skip header line
+                                if any(keyword in line.lower() for keyword in ['họ tên', 'mssv', 'name', 'student']):
+                                    header_found = True
+                                    continue
+                                
+                                # Nếu có dấu phẩy trong dòng và có header, chỉ lấy dữ liệu cần thiết
+                                if ',' in line and header_found:
+                                    parts = [part.strip() for part in line.split(',') if part.strip()]
+                                    # Chỉ lấy phần đầu tiên (tên) hoặc phần thứ hai (MSSV) làm input
+                                    # Tránh lấy cả hai để không tạo duplicate
+                                    if len(parts) >= 2:
+                                        # Ưu tiên MSSV vì chính xác hơn
+                                        mssv_part = parts[1].strip()
+                                        if mssv_part.isdigit() and len(mssv_part) >= 6:
+                                            csv_data.append(mssv_part)
+                                        else:
+                                            # Nếu không phải MSSV, lấy tên
+                                            csv_data.append(parts[0].strip())
+                                    else:
+                                        csv_data.append(parts[0].strip())
+                                else:
+                                    # Dòng không có dấu phẩy hoặc không có header
+                                    csv_data.append(line)
+                            
+                            all_inputs.extend(csv_data)
                         elif file.filename.endswith('.txt'):
                             content = file.read().decode('utf-8')
                             lines = [line.strip() for line in content.split('\n') if line.strip()]
@@ -1266,20 +1320,6 @@ def api_advanced_search_upload():
             'matches': matches,
             'total_input_items': len(all_inputs),
             'extracted_data': {'inputs': all_inputs}
-        })
-        
-    except Exception as e:
-        logger.error(f"Error in advanced search upload: {e}")
-        return jsonify({
-            'success': False,
-            'error': str(e)
-        }), 500
-        
-        return jsonify({
-            'success': True,
-            'matches': matches,
-            'total_input_items': total_input_items,
-            'extracted_data': all_extracted_data
         })
         
     except Exception as e:

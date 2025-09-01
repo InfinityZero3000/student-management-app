@@ -1,7 +1,7 @@
 """
 File Processor for HUIT Student Management System
 Handles file upload, parsing, and intelligent data extraction
-Supports CSV, DOCX, XLSX, TXT formats with Vietnamese text processing
+Supports CSV, XLSX, TXT formats with Vietnamese text processing
 """
 
 import os
@@ -15,13 +15,6 @@ from pathlib import Path
 logger = logging.getLogger(__name__)
 
 # Try to import optional dependencies
-try:
-    import docx
-    DOCX_AVAILABLE = True
-except ImportError:
-    DOCX_AVAILABLE = False
-    logger.warning("python-docx not installed. DOCX file support disabled.")
-
 try:
     import openpyxl
     XLSX_AVAILABLE = True
@@ -40,9 +33,6 @@ def extract_text_from_file(file_path, file_extension):
         if file_extension in ['.txt', '.csv']:
             with open(file_path, 'r', encoding='utf-8') as f:
                 return f.read()
-        elif file_extension == '.docx' and DOCX_AVAILABLE:
-            doc = docx.Document(file_path)
-            return '\n'.join([paragraph.text for paragraph in doc.paragraphs])
         elif file_extension in ['.xlsx', '.xls'] and XLSX_AVAILABLE:
             # Try pandas first for better data handling
             try:
@@ -247,16 +237,13 @@ def validate_file(file):
     if file.content_length and file.content_length > 16 * 1024 * 1024:
         return False, f"File '{file.filename}' quá lớn. Kích thước tối đa là 16MB"
     
-    allowed_extensions = {'.csv', '.docx', '.xlsx', '.xls', '.txt'}
+    allowed_extensions = {'.csv', '.xlsx', '.xls', '.txt'}
     file_extension = os.path.splitext(file.filename)[1].lower()
     
     if file_extension not in allowed_extensions:
-        return False, f"File '{file.filename}' không được hỗ trợ. Chỉ hỗ trợ: CSV, DOCX, XLSX, TXT"
+        return False, f"File '{file.filename}' không được hỗ trợ. Chỉ hỗ trợ: CSV, XLSX, TXT"
     
     # Check if required libraries are available
-    if file_extension == '.docx' and not DOCX_AVAILABLE:
-        return False, "DOCX files không được hỗ trợ. Vui lòng cài đặt python-docx"
-    
     if file_extension in ['.xlsx', '.xls'] and not XLSX_AVAILABLE:
         return False, "XLSX files không được hỗ trợ. Vui lòng cài đặt openpyxl"
     
