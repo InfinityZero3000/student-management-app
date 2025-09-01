@@ -8,9 +8,9 @@ A modern web-based student management system built with **Flask**, featuring an 
 ### ✨ Key Features
 - 📊 **Statistical Dashboard**: Comprehensive student data overview with interactive charts
 - 🔍 **Advanced Search**: Precise search by student ID, name, class, birth date
-- 📁 **Multi-format Import**: Support for CSV, DOCX, XLSX, TXT files
+- 📁 **Multi-format Import**: Support for CSV, XLSX, TXT files
 - 📈 **Detailed Analytics**: Score analysis, grade distribution, pass rates
-- 📋 **Data Management**: View, compare, and export reports
+- 📋 **Data Management**: View and export reports
 - 🎯 **Smart Search**: High-precision search algorithms
 
 ## System Requirements
@@ -55,7 +55,6 @@ student-management-app/
 │   ├── server.py                # Main server
 │   ├── student_search.py        # Advanced search engine
 │   ├── file_processor.py        # File I/O processing
-│   ├── data_comparator.py       # Data comparison
 │   ├── requirements.txt         # Dependencies
 │   ├── static/                  # Static resources
 │   │   ├── css/style.css       # Main stylesheet
@@ -64,11 +63,10 @@ student-management-app/
 │       ├── base.html           # Base template
 │       ├── dashboard.html      # Dashboard homepage
 │       ├── advanced_search.html # Advanced search
-│       ├── compare.html        # Data comparison
 │       ├── data_management.html # Data management
 │       └── statistics.html     # Statistics
 ├── data/                       # Sample data
-│   └── huit_point_student.csv  # HUIT data file (3221 records)
+│   └── point.csv               # Student data file (3221 records)
 ├── .gitignore                  # Git ignore rules
 └── README.md                   # This documentation
 ```
