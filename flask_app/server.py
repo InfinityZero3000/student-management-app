@@ -677,6 +677,11 @@ def reports():
     """Reports page"""
     return render_template('reports.html', has_data=(student_data is not None and not student_data.empty))
 
+@app.route('/class-comparison')
+def class_comparison():
+    """Class comparison page"""
+    return render_template('class_comparison.html')
+
 # API Routes
 @app.route('/api/dashboard-data')
 def api_dashboard_data():
