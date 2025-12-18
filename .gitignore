@@ -322,6 +322,7 @@ htmlcov/
 
 # Specific to this project
 huit_point_student.csv
+data/huit_point_student.csv
 danh_sach_sinh_vien.csv
 diem_so_mau.csv
 sinh_vien_mau.csv
